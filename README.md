@@ -4,10 +4,9 @@ In this project I cloned the official SAFE Template and modified it to work in a
 
 Warning: this is not an official guide of the "event sourcing" topic. It is just my experiment.
 
-It looks to me that the advantage is the possibility to work effectively on the domain logic in a way unaware of the persistency without too much concern because the storage is uniform for any project (no other entity to store apart form the events). A little price to pay is having to add some boilerplate code (basically are events as wrapper for members of the aggregate, and commands that returns events and other dispatching logic).
-I think it could be possible to reuse many part of the project as libraries in another project.
+It looks to me that the advantage is the possibility to work effectively on the domain logic in a way unaware of the persistency because the storage is uniform for any project (no other entity to store apart form the events). A little price to pay is having to add some boilerplate code (basically are events as wrapper for members of the aggregate, and commands that returns events and other dispatching logic).
 
-Particularly: the following files can be reused for any similar project:
+The following files can be reused for any similar project:
 * [Db.fs](./src/Server/Db.fs): connect to the database writing and reading events and snapshots
 * [Repository.fs](./src/Server/Repository.fs): rely on the previous Db.fs file to:
 * 1) get the current state.
@@ -34,6 +33,8 @@ I guess that this can be improved by using features that are available only in .
 ## Final thoughts:
 It looks to me that by such kind of approach it could be possible to focus on conversations, modeling, testing on the aggregate without hitting the database or other parts that are typically slower.
 
+## Installation
+The ordinary SAFE requirement plus a postgres database using the Schema.sql script to create user, database, and tables
 
 # SAFE Template
 
