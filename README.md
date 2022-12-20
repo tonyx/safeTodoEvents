@@ -20,7 +20,7 @@ Particularly: the following files can be reused for any similar project:
 * 1.  defining events that Union based, that implements the Processable interface and are wrappers for methods on the Root (as in Todos.fs)
 * 2.  defining Commands that implements the Executable<> interface and that are wrapper fot the events, as in the Commands.fs file
 A more detailed explanation will come soon....
-* 3. In App.fs file there is another wrapper (!) that expose the logic of the commands in a way that they can be called in a "atomic" (i.e. transactional) way. There is also the logic for creating snapshots according to an interval policy.
+* 3. In App.fs file there is another wrapper (!) that exposes the logic of the commands in a way that they can be called in a "atomic" (i.e. transactional) way. There is also the logic for creating snapshots according to an interval policy.
 Note that the aggregate defines a "zero" instance which is the initial state and this zero instance is passed around methods like "getSnapshot" just to make possible to return an initial snapshot if there is no one.
 I guess that trick will not be needed anymore by using features like abstract static methods in interfaces.
 
