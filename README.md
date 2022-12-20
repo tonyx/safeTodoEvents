@@ -4,17 +4,17 @@ In this project I cloned the official SAFE Template and modified it to work in a
 
 Warning: this is not an official guide of the "event sourcing" topic. It is just my experiment.
 
-It looks to me that the advantage is the possibility to work on a domain logic in a way unaware of the persistency. A little price to pay is having to add some boilerplate code (basically are events as wrapper for members of the aggregate, and commands that returns events and other dispatching logic).
+It looks to me that the advantage is the possibility to work effectively on the domain logic in a way unaware of the persistency without too much concern because the storage is uniform for any project (no other entity to store apart form the events). A little price to pay is having to add some boilerplate code (basically are events as wrapper for members of the aggregate, and commands that returns events and other dispatching logic).
 I think it could be possible to reuse many part of the project as libraries in another project.
 
 Particularly: the following files can be reused for any similar project:
-* Db.fs: connect to the database writing and reading events and snapshots
-* Repository.fs: using the previous Db.fs file to:
+* [Db.fs](./src/Server/Db.fs): connect to the database writing and reading events and snapshots
+* [Repository.fs](./src/Server/Repository.fs): rely on the previous Db.fs file to:
 * 1) get the current state.
 * 2) run commands, generating the corresponding event and storing them.
 * 3) create snapshots
 
-* EventSourcing.fs: defines abstractions based on interfaces, generics, constraints. Specifically, any aggregate (the Todos.fs class in my case) - which is basically a coherent and consistent part of your domain - must implement the Root interface and must implement the related __Evolve__ member by calling the _evolve_ function defined in this module. There is also need to define events in the same module where you define your Root class.
+* [EventSourcing.fs](./src/Shared/EventSourcing.fs): defines abstractions based on interfaces, generics, constraints. Specifically, any aggregate (the [Todos.fs](./src/shared/Todos.fs) class in my case) - which is basically a coherent and consistent part of your domain - must implement the Root interface and must implement the related __Evolve__ member by calling the _evolve_ function defined in this module. There is also need to define events in the same module where you define your Root class.
 The member of the aggregate must work in a functional style. For instance the _AddTodo_ member must return a copy of the Todos itself including the new todo.
 
 * Boilerplate code is essentially based on:
