@@ -19,8 +19,8 @@ The member of the aggregate must work in a functional style. For instance the _A
 
 * Boilerplate code is essentially based on:
 * 1.  defining events that discriminated Unions and implement the Processable interface, to wrapper the respective members defined in the aggregate (as in Todos.fs that includes both the aggregate and the events)
-* 2.  defining _Commands_ that implements the _Executable_ interface and that returns events, as in the Commands.fs file
-* 3.  In App.fs file there is another wrapper (!) that exposes the logic of the commands in a way that they can be called in a "atomic" (i.e. transactional) way. In this way I think we ensure that the integrity of the  context of the execution of any command that returns events, is preserved: if the command returns events that will not end up in an error, then the event that are stored will not generate errors.
+* 2.  defining _Commands_ that implements the _Executable_ interface and that returns events, as in the [Commands.fs](./src/Shared/Commands.fs).
+* 3.  In [App.fs](./src/Server/App.fs) file there is another wrapper (!) that exposes the logic of the commands in a way that they can be called in a "atomic" (i.e. transactional) way. In this way I think we ensure that the integrity of the  context of the execution of any command that returns events, is preserved: if the command returns events that will not end up in an error, then the event that are stored will not generate errors.
 The Events, if stored, should never return error, but anyway I made them returning _Result_ just in case.
 
  There is also the logic for creating snapshots according to an interval policy (i.e. each ten events stored, a snapshot is stored as well). Events aimed to "change" the aggregate must be applied in a transactional way to maintain consistency. The events cannot return Error, but they are not supposed to.
