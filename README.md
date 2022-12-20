@@ -4,8 +4,8 @@ In this project I cloned the official SAFE Template and modified it to work in a
 
 Warning: this is not an official guide of the "event sourcing" topic. It is just my experiment.
 
-One benefit looks like the possibility to work on a domain logic in a way unaware of the persistency, with the price to pay of adding some boilerplate code (events wrapping methods, commands wrapping events and other stuff).
-I think it could be possible to reuse many part of the project as  libraries.
+It looks to me that the advantage is the possibility to work on a domain logic in a way unaware of the persistency, with the little price to pay of adding some boilerplate code (basically are events as wrapper for members of the aggregate, and commands that returns events and some other dispatching logic).
+I think it could be possible to reuse many part of the project as  libraries in another project.
 
 Particularly: the following files can be reused for any similar project:
 * Db.fs: connect to the database writing and reading events and snapshots
@@ -14,14 +14,21 @@ Particularly: the following files can be reused for any similar project:
 * 2) run commands, generating the corresponding event and storing them.
 * 3) create snapshots
 
-* EventSourcing.fs: defines abstractions based on interfaces, generics, constraints. Particularly, the aggregate (the Todos.fs class in my case) must implement the Root interface and must implement the related Evolve member by calling the evolve function defined in this module. There is also need to define events in the same module where you define your Root class.
+* EventSourcing.fs: defines abstractions based on interfaces, generics, constraints. Particularly, any aggregate (the Todos.fs class in my case), which is basically a coherent and consistent part of your domain, must implement the Root interface and must implement the related Evolve member by calling the evolve function defined in this module. There is also need to define events in the same module where you define your Root class.
+The member of the aggregate that "changes" must work in a functional style. I.e. Adding a Todo will end up in returning a copy of the Todos itself including the new todo.
 
 * Boilerplate code is essentially based on:
 * 1.  defining events that are Union based, implementing  the Processable interface wrapping member defined in the aggregate (as in Todos.fs)
 * 2.  defining Commands that implements the Executable<> interface and that are wrapper of the events, as in the Commands.fs file
-* 3. In App.fs file there is another wrapper (!) that exposes the logic of the commands in a way that they can be called in a "atomic" (i.e. transactional) way. There is also the logic for creating snapshots according to an interval policy (i.e. each ten events stored, a snapshot is stored as well).
-Note that the aggregate defines a "zero" instance which is the initial state and this zero instance is passed around methods like "getSnapshot" just to make possible to return an initial snapshot if there is no one.
-I guess that trick will not be needed anymore by using features like abstract static methods in interfaces.
+* 3.  In App.fs file there is another wrapper (!) that exposes the logic of the commands in a way that they can be called in a "atomic" (i.e. transactional) way. There is also the logic for creating snapshots according to an interval policy (i.e. each ten events stored, a snapshot is stored as well).
+
+Other "dispatching" logic are part of the way the original SAFE example. (i.e. ITodos interface and implementation)
+
+Note that the aggregate needs a "zero" instance which is the initial state and this zero instance is passed around methods like "getSnapshot" just to make possible to return an initial snapshot if there is no one.
+I guess that this can be improved by using features that are available only in .net 7.0 like abstract static methods in interfaces.
+
+## Final thoughts:
+It looks to me that by such kind of approach it could be possible to focus on conversations, modeling, testing on the aggregate without hitting the database or other parts that are typically slower.
 
 
 # SAFE Template
