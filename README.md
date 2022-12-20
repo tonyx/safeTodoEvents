@@ -4,8 +4,8 @@ In this project I cloned the official SAFE Template and modified it to work in a
 
 Warning: this is not an official guide of the "event sourcing" topic. It is just my experiment.
 
-It looks to me that the advantage is the possibility to work on a domain logic in a way unaware of the persistency, with the little price to pay of adding some boilerplate code (basically are events as wrapper for members of the aggregate, and commands that returns events and some other dispatching logic).
-I think it could be possible to reuse many part of the project as  libraries in another project.
+It looks to me that the advantage is the possibility to work on a domain logic in a way unaware of the persistency. A little price to pay is having to add some boilerplate code (basically are events as wrapper for members of the aggregate, and commands that returns events and other dispatching logic).
+I think it could be possible to reuse many part of the project as libraries in another project.
 
 Particularly: the following files can be reused for any similar project:
 * Db.fs: connect to the database writing and reading events and snapshots
@@ -14,13 +14,17 @@ Particularly: the following files can be reused for any similar project:
 * 2) run commands, generating the corresponding event and storing them.
 * 3) create snapshots
 
-* EventSourcing.fs: defines abstractions based on interfaces, generics, constraints. Particularly, any aggregate (the Todos.fs class in my case), which is basically a coherent and consistent part of your domain, must implement the Root interface and must implement the related Evolve member by calling the evolve function defined in this module. There is also need to define events in the same module where you define your Root class.
-The member of the aggregate that "changes" must work in a functional style. I.e. Adding a Todo will end up in returning a copy of the Todos itself including the new todo.
+* EventSourcing.fs: defines abstractions based on interfaces, generics, constraints. Specifically, any aggregate (the Todos.fs class in my case) - which is basically a coherent and consistent part of your domain - must implement the Root interface and must implement the related __Evolve__ member by calling the _evolve_ function defined in this module. There is also need to define events in the same module where you define your Root class.
+The member of the aggregate must work in a functional style. For instance the _AddTodo_ member must return a copy of the Todos itself including the new todo.
 
 * Boilerplate code is essentially based on:
-* 1.  defining events that are Union based, implementing  the Processable interface wrapping member defined in the aggregate (as in Todos.fs)
-* 2.  defining Commands that implements the Executable<> interface and that are wrapper of the events, as in the Commands.fs file
-* 3.  In App.fs file there is another wrapper (!) that exposes the logic of the commands in a way that they can be called in a "atomic" (i.e. transactional) way. There is also the logic for creating snapshots according to an interval policy (i.e. each ten events stored, a snapshot is stored as well).
+* 1.  defining events that discriminated Unions and implement the Processable interface, to wrapper the respective members defined in the aggregate (as in Todos.fs that includes both the aggregate and the events)
+* 2.  defining _Commands_ that implements the _Executable_ interface and that returns events, as in the Commands.fs file
+* 3.  In App.fs file there is another wrapper (!) that exposes the logic of the commands in a way that they can be called in a "atomic" (i.e. transactional) way. In this way I think we ensure that the integrity of the  context of the execution of any command that returns events, is preserved: if the command returns events that will not end up in an error, then the event that are stored will not generate errors.
+The Events, if stored, should never return error, but anyway I made them returning _Result_ just in case.
+
+ There is also the logic for creating snapshots according to an interval policy (i.e. each ten events stored, a snapshot is stored as well). Events aimed to "change" the aggregate must be applied in a transactional way to maintain consistency. The events cannot return Error, but they are not supposed to.
+ j
 
 Other "dispatching" logic are part of the way the original SAFE example. (i.e. ITodos interface and implementation)
 
