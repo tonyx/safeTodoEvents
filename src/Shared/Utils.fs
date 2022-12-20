@@ -11,7 +11,7 @@ module Utils =
             json |> JsonConvert.DeserializeObject<'H> |> Ok
         with
         | ex  -> Error (ex.ToString())
-    type CeErrorBuilder()  =
+    type CeResultBuilder()  =
         member this.Bind(x, f) =
             match x with
             | Error x1 -> Error x1

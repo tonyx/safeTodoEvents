@@ -9,10 +9,10 @@ open Newtonsoft.Json
 
 module Repository =
     open BackEnd
-    let ceError = CeErrorBuilder()
+    let ceResult = CeResultBuilder()
 
     let inline getLastSnapshot<'H> (zero: 'H) =
-        ceError {
+        ceResult {
             let! result =
                 match Db.tryGetLastSnapshot()  with
                 | Some (id, json) ->
@@ -25,7 +25,7 @@ module Repository =
         }
 
     let getState<'H, 'E when 'E :> Processable<'H>> (zero: 'H) =
-        ceError {
+        ceResult {
             let! (id, state) = getLastSnapshot<'H> (zero)
             let events = Db.getEventsAfterId id
             let lastId =
@@ -40,7 +40,7 @@ module Repository =
         }
 
     let runCommand<'H, 'E when 'E :> Processable<'H>> (zero: 'H) (command: Executable<'H, 'E>)  =
-        ceError {
+        ceResult {
             let! (_, state) = getState<'H, 'E> (zero)
             let! events =
                 state
@@ -51,7 +51,7 @@ module Repository =
         }
 
     let mksnapshot<'H, 'E when 'E :> Processable<'H>> (zero: 'H) =
-        ceError
+        ceResult
             {
                 let! (id, state) = getState<'H, 'E> (zero: 'H)
                 let snapshot = state |> JsonConvert.SerializeObject
@@ -60,7 +60,7 @@ module Repository =
             }
 
     let mksnapshotIfInterval<'H, 'E when 'E :> Processable<'H>> (zero: 'H) =
-        ceError
+        ceResult
             {
                 let! lastEventId = Db.getLastEventId() |> optionToResult
                 let! lastSnapshot = getLastSnapshot<'H> (zero)

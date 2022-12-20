@@ -18,7 +18,7 @@ module Db =
     [<Literal>]
     let snapshotInterval = 10
 
-    let ceError = CeErrorBuilder()
+    let ceResult = CeResultBuilder()
 
     let tryGetLastSnapshot()  =
         TPConnectionString
@@ -55,7 +55,7 @@ module Db =
             ) |> Seq.tryHead
 
     let setSnapshot id snapshot =
-        ceError
+        ceResult
             {
                 let! event = getEvent id |> optionToResult
                 let _ =

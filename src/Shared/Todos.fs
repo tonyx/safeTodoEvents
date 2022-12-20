@@ -25,7 +25,7 @@ module rec Todos =
                     todos = []
                 }
             member this.AddTodo (t: Todo) =
-                ceError {
+                ceResult {
                     let! mustNotExist =
                         this.todos
                         |> List.exists (fun x -> x.Description = t.Description)
@@ -40,7 +40,7 @@ module rec Todos =
                 }
 
             member this.RemoveTodo (id: Guid) =
-                ceError {
+                ceResult {
                     let! mustExist =
                         this.todos
                         |> List.exists (fun x -> x.Id = id)

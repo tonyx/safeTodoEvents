@@ -7,7 +7,7 @@ open FSharpPlus.Data
 open Utils
 
 module EventSourcing =
-    let ceError = CeErrorBuilder()
+    let ceResult = CeResultBuilder()
 
     type Processable<'H> =
         abstract member Process: 'H -> Result<'H, string>

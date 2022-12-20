@@ -14,7 +14,7 @@ module App =
     open Repository
 
     let getAllTodos() =
-        ceError {
+        ceResult {
             let! (_, state) = getState<Todos, Event> (Todos.Zero)
             let todos = state.GetTodos()
             return todos
@@ -33,14 +33,14 @@ module App =
             id |> Command.RemoveTodo |> (runCommand<Todos, Event> Todos.Zero)
 
     let addTodo todo =
-        ceError {
+        ceResult {
             let! result = doAtomicAction(AtomicAction.AddTodo todo)
             let _ = mksnapshotIfInterval<Todos, Event> Todos.Zero
             return result
         }
 
     let removeTodo id =
-        ceError {
+        ceResult {
             let! result = doAtomicAction(AtomicAction.RemoveTodo id)
             let _ = mksnapshotIfInterval<Todos, Event> Todos.Zero
             return result
