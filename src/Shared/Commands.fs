@@ -23,6 +23,7 @@ module Commands =
                 | RemoveTodo g ->
                     match x.RemoveTodo g with
                         | Ok _ -> [Event.TodoRemoved g] |> Ok
+                        
                         | Error x -> x |> Error
 
         static member Executes (l: List<Executable<Todos, Event>>) (t: Todos) =

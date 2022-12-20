@@ -1,8 +1,28 @@
-# EVENT sourcing
+# Event sourcing version of SAFE template
 
-In this project I cloned the official SAFE Template and modified it to work in a "event sourging" style.
+In this project I cloned the official SAFE Template and modified it to work in a "event sourcing" style.
 
+Warning: this is not an official source fo the "event sourcing" topic.
+
+The aim of this project is to investigate about a possible way to work on a domain logic in a way unaware of the persistency using event sourcing style.
+Another goal is being able to make it a starting point for a library and a set of practices for event sourcing.
+
+Particularly: the following files can be reused for any similar project:
+* Db.fs: connect to the database writing and reading events and snapshots
+* Repository.fs: using the previous Db.fs file is able to:
+* 1) get the current state.
+* 2) run a command, generating the corresponding event and storing them.
+* 3) create snapshots
+
+* EventSourcing.fs: defines abstractions based on interfaces, generics, constraints. Particularly, the aggregate (the Todos.fs class in my case) must implement the Root interface and must implement the evolve method calling the evolve function defined in this module. There is also need to define events in the same module where you define your Root class.
+
+* Boilerplate code is essentially based on:
+* 1.  defining events that Union based, that implements the Processable interface and are wrappers for methods on the Root (as in Todos.fs)
+* 2.  defining Commands that implements the Executable<> interface and that are wrapper fot the events, as in the Commands.fs file
 A more detailed explanation will come soon....
+* 3. In App.fs file there is another wrapper (!) that expose the logic of the commands in a way that they can be called in a "atomic" (i.e. transactional) way. There is also the logic for creating snapshots according to an interval policy.
+Note that the aggregate defines a "zero" instance which is the initial state and this zero instance is passed around methods like "getSnapshot" just to make possible to return an initial snapshot if there is no one.
+I guess that trick will not be needed anymore by using features like abstract static methods in interfaces.
 
 
 # SAFE Template
