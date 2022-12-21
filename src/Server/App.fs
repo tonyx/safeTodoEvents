@@ -22,11 +22,7 @@ module App =
 
     [<MethodImpl(MethodImplOptions.Synchronized)>]
     let doAtomicAction (action: Command ) =
-        match action with
-        | Command.AddTodo todo ->
-            todo |> Command.AddTodo |> (runCommand<Todos, Event> Todos.Zero)
-        | Command.RemoveTodo id ->
-            id |> Command.RemoveTodo |> (runCommand<Todos, Event> Todos.Zero)
+        action |> (runCommand<Todos, Event> Todos.Zero)
 
     let addTodo todo =
         ceResult {
