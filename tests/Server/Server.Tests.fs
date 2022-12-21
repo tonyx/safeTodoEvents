@@ -14,6 +14,8 @@ let all =
     testList "All"
         [
             server
+            Shared.Tests.shared
+            Shared.Tests.domain
         ]
 
 [<EntryPoint>]
