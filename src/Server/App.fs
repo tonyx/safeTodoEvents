@@ -20,28 +20,24 @@ module App =
             return todos
         }
 
-    type AtomicAction =
-        | AddTodo of Todo
-        | RemoveTodo of Guid
-
     [<MethodImpl(MethodImplOptions.Synchronized)>]
-    let doAtomicAction (action: AtomicAction ) =
+    let doAtomicAction (action: Command ) =
         match action with
-        | AtomicAction.AddTodo todo ->
+        | Command.AddTodo todo ->
             todo |> Command.AddTodo |> (runCommand<Todos, Event> Todos.Zero)
-        | AtomicAction.RemoveTodo id ->
+        | Command.RemoveTodo id ->
             id |> Command.RemoveTodo |> (runCommand<Todos, Event> Todos.Zero)
 
     let addTodo todo =
         ceResult {
-            let! result = doAtomicAction(AtomicAction.AddTodo todo)
+            let! result = doAtomicAction(Command.AddTodo todo)
             let _ = mksnapshotIfInterval<Todos, Event> Todos.Zero
             return result
         }
 
     let removeTodo id =
         ceResult {
-            let! result = doAtomicAction(AtomicAction.RemoveTodo id)
+            let! result = doAtomicAction(Command.RemoveTodo id)
             let _ = mksnapshotIfInterval<Todos, Event> Todos.Zero
             return result
         }
