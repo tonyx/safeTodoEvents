@@ -13,7 +13,7 @@ module Commands =
         | AddTodo of Todo
         | RemoveTodo of Guid
 
-        interface Executable<Todos,Event> with
+        interface Executable<Todos, Event> with
             member this.Execute (x: Todos) =
                 match this with
                 | AddTodo t ->

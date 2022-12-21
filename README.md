@@ -1,36 +1,25 @@
 # Event sourcing version of SAFE template
 
-In this project, I cloned the official SAFE Template and modified it to work in an "event sourcing" style.
+I reused the official SAFE Template to make it work in the "event sourcing" style.
 
-Warning: this is not an official guide of the "event sourcing" topic. It is just my experiment.
+The domain [Todos.fs](./src/Shared/Todos.fs) is unaware the persistency logic. I needed to add just some boilerplate code (events, commands, dispatching).
 
-It looks to me that the advantage is the possibility to work effectively on the domain logic in a way unaware of the persistency because the storage is uniform for any project (no other entity to store except events and snapshots). A little price to pay is having to add some boilerplate code (such as  events as a wrapper for members of the aggregate, and commands that returns events, dispatching logic).
-
-The following files can be reused for any similar project:
+Should I work on a different domain in a similar way I would replace the Todos.fs with my domain, write  events, commands in [Commands.fs](./src/Shared/Commands.fs), and [App.fs](./src/Server/App.fs).
+I would reuse The following files:
 * [Db.fs](./src/Server/Db.fs): connect to the database for writing and reading events and snapshots
 * [Repository.fs](./src/Server/Repository.fs): rely on the previous Db.fs file to:
 * 1) get the current state.
 * 2) run commands, generating the corresponding events and storing them.
 * 3) store and read snapshots
+* 4) [EventSourcing.fs](./src/Shared/EventSourcing.fs): defines abstractions based on interfaces, generics, constraints.
 
-* [EventSourcing.fs](./src/Shared/EventSourcing.fs): defines abstractions based on interfaces, generics, constraints. Specifically, any aggregate (the [Todos.fs](./src/shared/Todos.fs) class in my case) - which is basically a coherent and consistent part of the domain - must implement the Root interface and must implement the related __Evolve__ member by calling the _evolve_ function defined in this module. You  also need to define events in the same module where you define your Root class.
-The members of the aggregate must work in a functional style. For instance the _AddTodo_ member must return a copy of the Todos itself including the new todo.
-
-* We need to add mechanically some pieces of code to define events, commands, dispatching. Particularly:
-* 1.  events as discriminated Unions implementing the _Processable_ interface, to wrap the members defined in the aggregate (as in Todos.fs that includes both the aggregate and the events)
-* 2.  defining _Commands_ that implements the _Executable_ interface and that returns events, as in the [Commands.fs](./src/Shared/Commands.fs).
-* 3.  In [App.fs](./src/Server/App.fs) source file I have another wrapper (!) that exposes the logic of the commands in a way that they can be called in a "atomic" (i.e. transactional) way. In this way I think we ensure that the integrity of the  context of the execution of any command that returns events, is preserved: if the command returns events that will not end up in an error, then the event that are stored will not generate errors because the context cannot be changed because of the "syncronized" attribute to the function that actually execute the command and store the related events (if the result is Ok for both the commands and the events).
-The Events, if stored, should never return error, but anyway I made them returning _Result_ just in case.
-
-Finally, the app expose the function that actually create and run commands and eventually create also a snapshot.
+Some small details:
+* 1.  The domain must implement the "Root interface", defining the Evolve member which must call the _evolve_ defined in EventSourcing.fs.
+* 2.  events must be discriminated Unions implementing the _Processable_ interface, to wrap the members defined in the aggregate ([Todos.fs](./src/Shared/Todos.fs).
+* 3.  _Commands_ implement the _Executable_ interface and returns events or error, as in the [Commands.fs](./src/Shared/Commands.fs).
+* 4.  In [App.fs](./src/Server/App.fs) I have another wrapper which exposes the logic of the commands in an a "atomic" (i.e. transactional) way to ensure integrity of the stored events (they should never return error).
 
 Other "dispatching" logic work in the same way as they original are part of the way the original SAFE example. (i.e. ITodosApi and  interface and implementation)
-
-Note that the aggregate needs a "zero" instance which is the initial state and this zero instance is passed around methods like "getSnapshot" just to make possible to return an initial snapshot if there is no one.
-I guess that this can be improved by using features that are available only in .net 7.0 like abstract static methods in interfaces.
-
-## Final thoughts:
-It looks to me that by such kind of approach it could be possible to focus on conversations, modeling, testing on the aggregate without hitting the database or other parts that are typically slower.
 
 ## Installation
 The ordinary SAFE requirement (as follows) plus a postgres database using the Schema.sql script to create user, database, and tables
