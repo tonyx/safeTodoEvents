@@ -1,14 +1,9 @@
 namespace BackEnd
 
-open System
-open FSharp.Data.Sql
-open FSharpPlus
 open Shared
 open Shared.Todos
 open System.Runtime.CompilerServices
 open Shared.Commands
-open Shared.EventSourcing
-open Newtonsoft.Json
 
 module App =
     open Repository

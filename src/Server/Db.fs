@@ -1,7 +1,5 @@
 namespace BackEnd
 
-open Saturn
-open System.Data
 open FSharp.Data.Sql
 open Npgsql.FSharp
 open FSharpPlus

@@ -24,6 +24,8 @@ Other "dispatching" logic work in the same way as they original are part of the 
 ## Installation
 The ordinary SAFE requirement (as follows) plus a postgres database using the Schema.sql script to create user, database, and tables
 
+## Notes:
+My approach is quite unconventional at the moment: Events can return Error, and commands just pre-apply events to the state and see if the result is not an error, and only in that case they return the events. This can change to comply to the standard approach, so that events will never return errors.
 
 # SAFE Template
 
