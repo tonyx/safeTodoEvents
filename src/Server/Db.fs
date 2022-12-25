@@ -22,19 +22,23 @@ module Db =
         TPConnectionString
         |> Sql.connect
         |> Sql.query "SELECT event_id, snapshot FROM snapshots ORDER BY id DESC LIMIT 1"
-        |> Sql.execute (fun read ->
+        |> Sql.executeAsync (fun read ->
             (
                 read.int "event_id",
                 read.text "snapshot"
             )
         )
+        |> Async.AwaitTask
+        |> Async.RunSynchronously
         |> Seq.tryHead
 
     let getLastEventId() =
         TPConnectionString
         |> Sql.connect
         |> Sql.query "SELECT id from events ORDER BY id DESC LIMIT 1"
-        |> Sql.execute  (fun read -> read.int "id")
+        |> Sql.executeAsync  (fun read -> read.int "id")
+        |> Async.AwaitTask
+        |> Async.RunSynchronously
         |> Seq.tryHead
 
     let getEvent id  =
@@ -42,7 +46,7 @@ module Db =
         |> Sql.connect
         |> Sql.query "SELECT * from events where id = @id"
         |> Sql.parameters ["id", Sql.int id]
-        |> Sql.execute
+        |> Sql.executeAsync
             (
                 fun read ->
                 {|
@@ -50,7 +54,10 @@ module Db =
                     Event = read.string "event"
                     Timestamp = read.dateTime "timestamp"
                 |}
-            ) |> Seq.tryHead
+            )
+            |> Async.AwaitTask
+            |> Async.RunSynchronously
+            |> Seq.tryHead
 
     let setSnapshot id snapshot =
         ceResult
@@ -59,7 +66,7 @@ module Db =
                 let _ =
                     TPConnectionString
                     |> Sql.connect
-                    |> Sql.executeTransaction
+                    |> Sql.executeTransactionAsync
                         [
                             "INSERT INTO snapshots (event_id, snapshot, timestamp) VALUES (@event_id, @snapshot, @timestamp)",
                                 [
@@ -70,6 +77,8 @@ module Db =
                                     ]
                                 ]
                         ]
+                    |> Async.AwaitTask
+                    |> Async.RunSynchronously
                 return ()
             }
 
@@ -77,7 +86,7 @@ module Db =
         try
             TPConnectionString
             |> Sql.connect
-            |> Sql.executeTransaction
+            |> Sql.executeTransactionAsync
                 [
                     "INSERT INTO events (event, timestamp) VALUES (@event, @timestamp)",
                     events
@@ -90,6 +99,8 @@ module Db =
                                 ]
                         )
                 ]
+                |> Async.AwaitTask
+                |> Async.RunSynchronously
                 |> Ok
         with
             | _ as ex -> (ex.ToString()) |> Error
@@ -99,9 +110,12 @@ module Db =
         |> Sql.connect
         |> Sql.query "SELECT id, event FROM events WHERE id > @id ORDER BY id"
         |> Sql.parameters ["id", Sql.int id]
-        |> Sql.execute ( fun read ->
+        |> Sql.executeAsync ( fun read ->
             (
                 read.int "id",
                 read.text "event"
             )
-        ) |> Seq.toList
+        )
+        |> Async.AwaitTask
+        |> Async.RunSynchronously
+        |> Seq.toList

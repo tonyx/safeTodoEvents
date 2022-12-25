@@ -1,6 +1,7 @@
 
 namespace BackEnd
 
+open System.Runtime.CompilerServices
 open FSharp.Data.Sql
 open FSharpPlus
 open Shared.Utils
@@ -39,6 +40,7 @@ module Repository =
             return (lastId, result)
         }
 
+    [<MethodImpl(MethodImplOptions.Synchronized)>]
     let runCommand<'H, 'E when 'E :> Processable<'H>> (zero: 'H) (command: Executable<'H, 'E>)  =
         ceResult {
             let! (_, state) = getState<'H, 'E> (zero)

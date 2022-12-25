@@ -2,7 +2,6 @@ namespace BackEnd
 
 open Shared
 open Shared.Todos
-open System.Runtime.CompilerServices
 open Shared.Commands
 
 module App =
@@ -15,21 +14,19 @@ module App =
             return todos
         }
 
-    [<MethodImpl(MethodImplOptions.Synchronized)>]
-    let doAtomicAction (action: Command ) =
-        action |> (runCommand<Todos, Event> Todos.Zero)
-
     let addTodo todo =
         ceResult {
-            let! result = doAtomicAction(Command.AddTodo todo)
+            let! _ =
+                todo |> Command.AddTodo |> (runCommand<Todos, Event> Todos.Zero)
             let _ = mksnapshotIfInterval<Todos, Event> Todos.Zero
-            return result
+            return ()
         }
 
     let removeTodo id =
         ceResult {
-            let! result = doAtomicAction(Command.RemoveTodo id)
+            let! _ =
+                id |> Command.RemoveTodo |> (runCommand<Todos, Event> Todos.Zero)
             let _ = mksnapshotIfInterval<Todos, Event> Todos.Zero
-            return result
+            return ()
         }
 
