@@ -9,18 +9,12 @@ open Shared.Utils
 module Db =
 
     let TPConnectionString = Conf.connectionString
-    // let TPConnectionString =
-    //     "Server=127.0.0.1;"+
-    //     "Database=todo;" +
-    //     "User Id=todo;"+
-    //     "Password=todo;"
 
     [<Literal>]
     let snapshotInterval = 10
 
     let ceResult = CeResultBuilder()
 
-    // todo: make it safe!
     let deleteAllevents () =
         if (Conf.isTestEnv) then
             let _ =
