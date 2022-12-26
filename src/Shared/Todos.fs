@@ -13,22 +13,22 @@ module rec Todos =
     open Utils
 
     module Cache =
-        let dic = Collections.Generic.Dictionary<Todos.Todos * Todos.Event, Result<Todos.Todos, string>>()
-        let queue = Collections.Generic.Queue<Todos.Todos * Todos.Event>()
+        let dic = Collections.Generic.Dictionary<'H * Processable<'H>, Result<'H, string>>()
+        let queue = Collections.Generic.Queue<'H * Processable<'H>>()
         [<MethodImpl(MethodImplOptions.Synchronized)>]
         let addToDictionary (arg, res) =
             dic.Add(arg, res)
-            queue.Enqueue(arg)
+            queue.Enqueue arg
             if (queue.Count > 13) then
                 let removed = queue.Dequeue()
-                dic.Remove(removed) |> ignore
+                dic.Remove removed |> ignore
             ()
 
-        let memoize (f: Todos.Todos -> Result<Todos.Todos, string>) (arg: Todos.Todos * Todos.Event) =
+        let memoize (f: 'H -> Result<'H, string>) (arg: 'H * Processable<'H>) =
             if (dic.ContainsKey arg) then
                 dic.[arg]
             else
-                let res = f (fst arg)
+                let res = arg |> fst |> f
                 addToDictionary(arg, res)
                 res
 
