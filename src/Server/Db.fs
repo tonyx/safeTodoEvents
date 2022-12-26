@@ -3,20 +3,39 @@ namespace BackEnd
 open FSharp.Data.Sql
 open Npgsql.FSharp
 open FSharpPlus
+open Shared
 open Shared.Utils
 
 module Db =
 
-    let TPConnectionString =
-        "Server=127.0.0.1;"+
-        "Database=todo;" +
-        "User Id=todo;"+
-        "Password=todo;"
+    let TPConnectionString = Conf.connectionString
+    // let TPConnectionString =
+    //     "Server=127.0.0.1;"+
+    //     "Database=todo;" +
+    //     "User Id=todo;"+
+    //     "Password=todo;"
 
     [<Literal>]
     let snapshotInterval = 10
 
     let ceResult = CeResultBuilder()
+
+    // todo: make it safe!
+    let deleteAllevents () =
+        if (Conf.isTestEnv) then
+            let _ =
+                TPConnectionString
+                |> Sql.connect
+                |> Sql.query "DELETE from snapshots"
+                |> Sql.executeNonQuery
+            let _ =
+                TPConnectionString
+                |> Sql.connect
+                |> Sql.query "DELETE from events"
+                |> Sql.executeNonQuery
+            ()
+        else
+            failwith "operation allowed only in test db"
 
     let tryGetLastSnapshot()  =
         TPConnectionString

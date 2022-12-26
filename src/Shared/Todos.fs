@@ -1,12 +1,13 @@
 namespace Shared
 open System
+open System.Runtime.CompilerServices
+
 open FSharp.Core
 
 open EventSourcing
 
 open FSharpPlus
 open FSharpPlus.Data
-open System.Runtime.CompilerServices
 
 module rec Todos =
     open Shared

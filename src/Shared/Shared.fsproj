@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Utils.fs" />
+    <Compile Include="Conf.fs" />
     <Compile Include="EventSourcing.fs" />
     <Compile Include="Shared.fs" />
     <Compile Include="Todos.fs" />

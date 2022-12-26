@@ -4,6 +4,7 @@ open Expecto
 
 open Shared
 open Server
+open Server.AppTests
 
 let server = testList "Server" [
     testCase "empty" <| fun _ ->
@@ -14,6 +15,7 @@ let all =
     testList "All"
         [
             server
+            Server.AppTests.appTests
             Shared.Tests.shared
             Shared.Tests.domain
         ]

@@ -18,15 +18,13 @@ module App =
         ceResult {
             let! _ =
                 todo |> Command.AddTodo |> (runCommand<Todos, Event> Todos.Zero)
-            let _ = mksnapshotIfInterval<Todos, Event> Todos.Zero
-            return ()
+            return!  (mksnapshotIfInterval<Todos, Event> Todos.Zero)
         }
 
     let removeTodo id =
         ceResult {
             let! _ =
                 id |> Command.RemoveTodo |> (runCommand<Todos, Event> Todos.Zero)
-            let _ = mksnapshotIfInterval<Todos, Event> Todos.Zero
-            return ()
+            return!  (mksnapshotIfInterval<Todos, Event> Todos.Zero)
         }
 

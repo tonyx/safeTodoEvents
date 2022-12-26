@@ -61,5 +61,4 @@ let domain = testList "Todos domain members" [
         Expect.isOk result "should be ok"
         let result' = result |> Result.get
         Expect.equal result' Todos.Zero "should be equal"
-
 ]
