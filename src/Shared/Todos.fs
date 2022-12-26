@@ -85,6 +85,6 @@ module rec Todos =
                     | TodoAdded (t: Todo) ->
                         Cache.memoize (fun x -> x.AddTodo t) (x, this)
                     | TodoRemoved (g: Guid) ->
-                        Cache.memoize  (fun x -> x.RemoveTodo g) (x, this)
+                        Cache.memoize (fun x -> x.RemoveTodo g) (x, this)
 
 

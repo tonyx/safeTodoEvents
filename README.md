@@ -1,11 +1,11 @@
 # Event sourcing version of SAFE template
 
-I reused the official SAFE Template to make it work in the "event sourcing" style.
+I adapted the SAFE Template to a tiny _event sourcing_ library created by me.
 
-The domain [Todos.fs](./src/Shared/Todos.fs) is unaware the persistency logic. I needed to add just some boilerplate code (events, commands, dispatching).
+The domain [Todos.fs](./src/Shared/Todos.fs) is unaware the persistency logic.
+Events (in the Todos.fs module) must be added to wrap domain logic methods, and commands ([Commands.fs](./src/Shared/Commands.fs) must return events.
 
-Should I work on a different domain in a similar way I would replace the Todos.fs with my domain, write  events, commands in [Commands.fs](./src/Shared/Commands.fs), and [App.fs](./src/Server/App.fs).
-I would reuse The following files:
+Basically all those files should be reusable.
 * [Db.fs](./src/Server/Db.fs): connect to the database for writing and reading events and snapshots
 * [Repository.fs](./src/Server/Repository.fs): rely on the previous Db.fs file to:
 * 1) get the current state.
@@ -13,11 +13,11 @@ I would reuse The following files:
 * 3) store and read snapshots
 * 4) [EventSourcing.fs](./src/Shared/EventSourcing.fs): defines abstractions based on interfaces, generics, constraints.
 
-Some small details:
-* 1.  The domain must implement the "Root interface", defining the Evolve member which must call the _evolve_ defined in EventSourcing.fs.
+Details:
+* 1.  The type representing the aggregate must implement the "Root interface", defining the Evolve member which must call the _evolve_ defined in EventSourcing.fs.
 * 2.  events must be discriminated Unions implementing the _Processable_ interface, to wrap the members defined in the aggregate ([Todos.fs](./src/Shared/Todos.fs).
 * 3.  _Commands_ implement the _Executable_ interface and returns events or error, as in the [Commands.fs](./src/Shared/Commands.fs).
-* 4.  In [App.fs](./src/Server/App.fs) I have another wrapper which exposes the logic of the commands in an a "atomic" (i.e. transactional) way to ensure integrity of the stored events (they should never return error).
+* 4.  [App.fs](./src/Server/App.fs) Exposes the domain logic. Methods present there run command if needed and create snapshots.
 
 Other "dispatching" logic work in the same way as they original are part of the way the original SAFE example. (i.e. ITodosApi and  interface and implementation)
 
