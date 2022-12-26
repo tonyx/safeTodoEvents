@@ -13,11 +13,13 @@ module Commands =
             member this.Execute (x: Todos) =
                 match this with
                 | AddTodo t ->
-                    match x.AddTodo t with
+                    match
+                        Cache.memoize (fun x -> x.AddTodo t) (x, Event.TodoAdded t) with
                         | Ok _ -> [Event.TodoAdded t] |> Ok
                         | Error x -> x |> Error
                 | RemoveTodo g ->
-                    match x.RemoveTodo g with
+                    match
+                        Cache.memoize (fun x -> x.RemoveTodo g) (x, Event.TodoRemoved g) with
                         | Ok _ -> [Event.TodoRemoved g] |> Ok
                         | Error x -> x |> Error
 
