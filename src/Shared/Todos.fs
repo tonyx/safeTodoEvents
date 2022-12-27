@@ -32,6 +32,15 @@ module rec Todos =
                 let res = arg |> fst |> f
                 addToDictionary(arg, res)
                 res
+    type TodosNextVer =
+        {
+            bla: string
+        }
+
+    let todonextInst =
+        {
+            bla = ""
+        }
 
     type Todos =
         {
