@@ -40,7 +40,7 @@ let appTests =
                 let retrieved' = App.getAllTodos() |> Result.get
                 Expect.isEmpty retrieved' "should be empty"
 
-            testCase "after adding the first event then a snapshot will be created immediately" <| fun _ ->
+            testCase "after adding the first todo a snapshot will be created" <| fun _ ->
                 Db.deleteAllevents()
                 let initSnapshot = Db.tryGetLastSnapshot()
                 Expect.isNone initSnapshot "should be none"
@@ -57,7 +57,7 @@ let appTests =
                 let snapshotState = snapshot |> Utils.deserialize<Todos.Todos> |> Result.get
                 Expect.equal state snapshotState "should be equal"
 
-            testCase "add few events and then the last snapshots will be unaligned from the current state" <| fun _ ->
+            testCase "add few todos and then the last snapshot will be unaligned respect of the current state" <| fun _ ->
                 Db.deleteAllevents()
                 let initSnapshot = Db.tryGetLastSnapshot()
                 Expect.isNone initSnapshot "should be none"

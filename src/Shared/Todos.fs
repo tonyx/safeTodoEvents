@@ -83,8 +83,8 @@ module rec Todos =
                 member this.Process (x: Todos ) =
                     match this with
                     | TodoAdded (t: Todo) ->
-                        Cache.memoize (fun (x: Todos) -> x.AddTodo t) (x, this)
+                        Cache.memoize (fun x -> x.AddTodo t) (x, this)
                     | TodoRemoved (g: Guid) ->
-                        Cache.memoize (fun (x: Todos) -> x.RemoveTodo g) (x, this)
+                        Cache.memoize (fun x -> x.RemoveTodo g) (x, this)
 
 
