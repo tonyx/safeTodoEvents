@@ -11,11 +11,8 @@ module EventSourcing =
 
     type Processable<'H> =
         abstract member Process: 'H -> Result<'H, string>
-    type MigrationRoot<'H, 'E when 'E :> Processable<'H>> =
-        abstract member Evolve:  List<'E> -> Result<'H, string>
     type Root<'H, 'E when 'E :> Processable<'H>> =
         abstract member Evolve:  List<'E> -> Result<'H, string>
-
     type Executable<'H, 'E when 'E :> Processable<'H>> =
         abstract member Execute: 'H -> Result<List<'E>, string>
 
