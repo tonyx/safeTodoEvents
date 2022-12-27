@@ -32,15 +32,6 @@ module rec Todos =
                 let res = arg |> fst |> f
                 addToDictionary(arg, res)
                 res
-    type TodosNextVer =
-        {
-            bla: string
-        }
-
-    let todonextInst =
-        {
-            bla = ""
-        }
 
     type Todos =
         {
@@ -89,11 +80,11 @@ module rec Todos =
         | TodoAdded of Todo
         | TodoRemoved of Guid
             interface Processable<Todos> with
-                member this.Process (x: Todos) =
+                member this.Process (x: Todos ) =
                     match this with
                     | TodoAdded (t: Todo) ->
-                        Cache.memoize (fun x -> x.AddTodo t) (x, this)
+                        Cache.memoize (fun (x: Todos) -> x.AddTodo t) (x, this)
                     | TodoRemoved (g: Guid) ->
-                        Cache.memoize (fun x -> x.RemoveTodo g) (x, this)
+                        Cache.memoize (fun (x: Todos) -> x.RemoveTodo g) (x, this)
 
 
