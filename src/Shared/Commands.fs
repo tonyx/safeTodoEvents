@@ -3,6 +3,7 @@ open System
 open FSharp.Core
 open EventSourcing
 open Todos
+open TodoEvents
 
 module Commands =
     type Command =

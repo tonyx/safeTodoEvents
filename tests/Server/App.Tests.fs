@@ -7,6 +7,7 @@ open BackEnd
 
 open Shared
 open Server
+open TodoEvents
 
 let appTests =
     testSequenced <|
@@ -52,7 +53,7 @@ let appTests =
                         }
                 let added = App.addTodo todo
                 Expect.isOk added "should be ok"
-                let (_, state) = Repository.getState<Todos.Todos, Todos.Event> Todos.Todos.Zero |> Result.get
+                let (_, state) = Repository.getState<Todos.Todos, TodoEvents.Event> Todos.Todos.Zero |> Result.get
                 let (_, snapshot) = (Db.tryGetLastSnapshot().Value)
                 let snapshotState = snapshot |> Utils.deserialize<Todos.Todos> |> Result.get
                 Expect.equal state snapshotState "should be equal"
@@ -75,7 +76,7 @@ let appTests =
                         }
                 let added' = App.addTodo todo'
                 Expect.isOk added' "should be ok"
-                let (_, state) = Repository.getState<Todos.Todos, Todos.Event> Todos.Todos.Zero |> Result.get
+                let (_, state) = Repository.getState<Todos.Todos, TodoEvents.Event> Todos.Todos.Zero |> Result.get
                 let (_, snapshot) = (Db.tryGetLastSnapshot().Value)
                 let snapshotState = snapshot |> Utils.deserialize<Todos.Todos> |> Result.get
                 Expect.notEqual state snapshotState "should be equal"

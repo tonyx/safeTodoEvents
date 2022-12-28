@@ -3,6 +3,7 @@ namespace BackEnd
 open Shared
 open Shared.Todos
 open Shared.Commands
+open Shared.TodoEvents
 
 module App =
     open Repository
