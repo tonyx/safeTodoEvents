@@ -14,11 +14,10 @@ Basically all those files should be reusable.
 * 4) [EventSourcing.fs](./src/Shared/EventSourcing.fs): defines abstractions based on interfaces, generics, constraints.
 
 Details:
-* 1.  The type representing the aggregate must implement the "Root interface", defining the Evolve member which must call the _evolve_ defined in EventSourcing.fs.
-* 2.  events must be discriminated Unions implementing the _Processable_ interface, to wrap the members defined in the aggregate ([Todos.fs](./src/Shared/Todos.fs).
-* 3.  _Commands_ implement the _Executable_ interface and returns events or error, as in the [Commands.fs](./src/Shared/Commands.fs).
-* 4.  [App.fs](./src/Server/App.fs) Exposes the domain logic. Methods present there run command if needed and create snapshots.
-* 6. __How to make upgrades i.e. manage versions__: I don't manage versioning yet, but I have clues that __as long as any change to the repository and/or the events are adding new behavior without changing previous behavior__ then the following steps should be safe to deploy upgrades:
+* 1.  events must be discriminated Unions implementing the _Processable_ interface, to wrap the members defined in the aggregate ([Todos.fs](./src/Shared/Todos.fs).
+* 2.  _Commands_ implement the _Executable_ interface and returns events or error, as in the [Commands.fs](./src/Shared/Commands.fs).
+* 3.  [App.fs](./src/Server/App.fs) Exposes the domain logic. Methods present there run command if needed and create snapshots.
+* 4. __How to make upgrades i.e. manage versions__: I don't manage versioning yet, but I have clues that __as long as any change to the repository and/or the events are adding new behavior without changing previous behavior__ then the following steps should be safe to deploy upgrades:
 * * A. when the new version of your root class is ready (i.e. the new version of the todo), then just deploy it, and delete all the snapshots entries in the snapshots table. What will happen is that the snapshot in the new format will be rebuilt, after restart or after an event.
 * * B. Deploy the part related to new events (Processable), commands (Executable) and App (App.fs exposing the business logic to outside).
 * * C. Make the new behavior available by extending the interface used by SAFE (i.e. the ITodosApi) and its implementation (todosapi in [Server.fs](./src/Server/Server.fs))
