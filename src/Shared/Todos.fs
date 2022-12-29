@@ -10,8 +10,8 @@ open FSharpPlus
 open FSharpPlus.Data
 
 module Cache =
-    let dic = Collections.Generic.Dictionary<'H * Processable<'H>, Result<'H, string>>()
-    let queue = Collections.Generic.Queue<'H * Processable<'H>>()
+    let dic = Collections.Generic.Dictionary<'H * List<Processable<'H>>, Result<'H, string>>()
+    let queue = Collections.Generic.Queue<'H * List<Processable<'H>>>()
     [<MethodImpl(MethodImplOptions.Synchronized)>]
     let addToDictionary (arg, res) =
         dic.Add(arg, res)
@@ -21,7 +21,7 @@ module Cache =
             dic.Remove removed |> ignore
         ()
 
-    let memoize (f: 'H -> Result<'H, string>) (arg: 'H * Processable<'H>) =
+    let memoize (f: 'H -> Result<'H, string>) (arg: 'H * List<Processable<'H>>) =
         if (dic.ContainsKey arg) then
             dic.[arg]
         else
@@ -81,6 +81,6 @@ module TodoEvents =
                 member this.Process (x: Todos ) =
                     match this with
                     | TodoAdded (t: Todo) ->
-                        Cache.memoize (fun x -> x.AddTodo t) (x, this)
+                        Cache.memoize (fun (x: Todos) -> x.AddTodo t) (x, [this])
                     | TodoRemoved (g: Guid) ->
-                        Cache.memoize (fun x -> x.RemoveTodo g) (x, this)
+                        Cache.memoize (fun (x: Todos) -> x.RemoveTodo g) (x, [this])
