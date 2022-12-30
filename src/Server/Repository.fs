@@ -4,6 +4,7 @@ namespace BackEnd
 open System.Runtime.CompilerServices
 open FSharp.Data.Sql
 open FSharpPlus
+open Shared
 open Shared.Utils
 open Shared.EventSourcing
 open Newtonsoft.Json
@@ -67,12 +68,11 @@ module Repository =
                 let! lastEventId = Db.getLastEventId() |> optionToResult
                 let! lastSnapshot = getLastSnapshot<'H> (zero)
                 let snapId = lastSnapshot |> fst
-
                 let! result =
-                    if ((lastEventId - snapId) > Db.snapshotInterval) then
+                    if ((lastEventId - snapId) > Conf.intervalBetweenSnapshots) then
                         mksnapshot<'H, 'E> (zero)
-                    else () |> Ok
-
+                    else
+                        () |> Ok
                 return result
             }
 

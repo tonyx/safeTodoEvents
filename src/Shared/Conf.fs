@@ -2,7 +2,6 @@
 namespace Shared
 open FSharp.Core
 
-
 module Conf =
     let isTestEnv = true
     // atm there is only one db, but here I point out that we need different rights in
@@ -22,3 +21,6 @@ module Conf =
             "Database=todo;" +
             "User Id=todo;"+
             "Password=todo;"
+
+    let intervalBetweenSnapshots = 10
+    let cacheSize = 13

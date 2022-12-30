@@ -81,4 +81,3 @@ let appTests =
                 let snapshotState = snapshot |> Utils.deserialize<Todos.Todos> |> Result.get
                 Expect.notEqual state snapshotState "should be equal"
         ]
-

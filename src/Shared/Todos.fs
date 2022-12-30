@@ -16,7 +16,7 @@ module Cache =
     let addToDictionary (arg, res) =
         dic.Add(arg, res)
         queue.Enqueue arg
-        if (queue.Count > 13) then
+        if (queue.Count > Conf.cacheSize) then
             let removed = queue.Dequeue()
             dic.Remove removed |> ignore
         ()
@@ -56,7 +56,6 @@ module Todos =
                         }
                     return result
                 }
-
             member this.RemoveTodo (id: Guid) =
                 ceResult {
                     let! mustExist =
