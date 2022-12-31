@@ -17,7 +17,7 @@ type EStorage =
     abstract member DeleteAllEvents: unit -> unit
     abstract member TryGetLastSnapshot: unit -> Option<int * json>
     abstract member TryGetLastEventId: unit -> Option<int>
-    abstract member GetEvent: int -> Option<StorageEvent>
+    abstract member TryGetEvent: int -> Option<StorageEvent>
     abstract member SetSnapshot: int * string -> Result<unit, string>
     abstract member AddEvents: List<json> -> Result<List<int>, string>
     abstract member GetEventsAfterId: int -> List<int * string >
@@ -68,7 +68,7 @@ module Db' =
                     |> Async.RunSynchronously
                     |> Seq.tryHead
 
-                member this.GetEvent id =
+                member this.TryGetEvent id =
                     TPConnectionString
                     |> Sql.connect
                     |> Sql.query "SELECT * from events where id = @id"
@@ -86,10 +86,10 @@ module Db' =
                         |> Async.RunSynchronously
                         |> Seq.tryHead
 
-                member this.SetSnapshot (id: int, snapshot: string) =
+                member this.SetSnapshot (id: int, snapshot: json) =
                     ceResult
                         {
-                            let! event = ((this :> EStorage).GetEvent id) |> optionToResult
+                            let! event = ((this :> EStorage).TryGetEvent id) |> optionToResult
                             let _ =
                                 TPConnectionString
                                 |> Sql.connect
@@ -109,7 +109,7 @@ module Db' =
                             return ()
                         }
 
-                member this.AddEvents (events: List<string>) =
+                member this.AddEvents (events: List<json>) =
                     try
                         TPConnectionString
                         |> Sql.connect
