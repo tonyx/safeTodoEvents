@@ -21,7 +21,7 @@ module Cache =
                 let removed = queue.Dequeue()
                 dic.Remove removed |> ignore
             ()
-        with :? _ as e -> printf "warning: cache is doing something wrong %A" e
+        with :? _ as e -> printf "warning: cache is doing something wrong %A\n" e
 
     let memoize (f: 'H -> Result<'H, string>) (arg: 'H * List<Processable<'H>>) =
         if (dic.ContainsKey arg) then
