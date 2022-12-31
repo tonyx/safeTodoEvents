@@ -13,20 +13,22 @@ module Cache =
     let dic = Collections.Generic.Dictionary<'H * List<Processable<'H>>, Result<'H, string>>()
     let queue = Collections.Generic.Queue<'H * List<Processable<'H>>>()
     [<MethodImpl(MethodImplOptions.Synchronized)>]
-    let addToDictionary (arg, res) =
-        dic.Add(arg, res)
-        queue.Enqueue arg
-        if (queue.Count > Conf.cacheSize) then
-            let removed = queue.Dequeue()
-            dic.Remove removed |> ignore
-        ()
+    let tryAddToDictionary (arg, res) =
+        try
+            dic.Add(arg, res)
+            queue.Enqueue arg
+            if (queue.Count > Conf.cacheSize) then
+                let removed = queue.Dequeue()
+                dic.Remove removed |> ignore
+            ()
+        with :? _ as e -> printf "warning: cache is doing something wrong %A" e
 
     let memoize (f: 'H -> Result<'H, string>) (arg: 'H * List<Processable<'H>>) =
         if (dic.ContainsKey arg) then
             dic.[arg]
         else
             let res = arg |> fst |> f
-            addToDictionary(arg, res)
+            tryAddToDictionary(arg, res)
             res
 
 module Todos =
