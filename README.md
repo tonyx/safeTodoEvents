@@ -1,39 +1,39 @@
 # Event sourcing version of SAFE template
 
-I adapted the SAFE Template to a tiny _event sourcing_ library created by me.
+I adapted the SAFE Template integrating it into a tiny _event sourcing_ set of utilities I created.
 
-The domain [Todos.fs](./src/Shared/Todos.fs) is unaware the persistency logic.
-Events (in the Todos.fs module) must be added to wrap domain logic methods, and commands ([Commands.fs](./src/Shared/Commands.fs) must return events.
+I created an aggregate implementing our logic [Todos.fs](./src/Shared/Todos.fs) and it is unaware the persistency logic, because I wrap members that are supposed to "change the state" (in a functional way) into commands and events, and then expose the commands in [App.fs](./src/Server/App.fs).
+To wrap specific domain logic members we need a discriminated union for the Events (in the Todos.fs module) and a discriminated union for commands [Commands.fs](./src/Shared/Commands.fs). What commands do is probing the respective members and return events if they don't return error.
 
-Basically all those files should be reusable.
+Recap. You create the aggregate, the events, expose them (as in App.fs), and anything else can be reused to implement the business domain.
+
+More details:
 * [Db.fs](./src/Server/Db.fs): connect to the database for writing and reading events and snapshots
 * [Repository.fs](./src/Server/Repository.fs): rely on the previous Db.fs file to:
 * 1) get the current state.
 * 2) run commands, generating the corresponding events and storing them.
 * 3) store and read snapshots
-* 4) [EventSourcing.fs](./src/Shared/EventSourcing.fs): defines abstractions based on interfaces, generics, constraints.
+* [EventSourcing.fs](./src/Shared/EventSourcing.fs): defines abstractions based on interfaces, generics, constraints.
 
-Details:
-* 1.  events must be discriminated Unions implementing the _Processable_ interface, to wrap the members defined in the aggregate ([Todos.fs](./src/Shared/Todos.fs).
+Description:
+* 1.  events must be discriminated Unions implementing the _Processable_ interface, to wrap the members defined in the aggregate [Todos.fs](./src/Shared/Todos.fs).
 * 2.  _Commands_ implement the _Executable_ interface and returns events or error, as in the [Commands.fs](./src/Shared/Commands.fs).
 * 3.  [App.fs](./src/Server/App.fs) Exposes the domain logic. Methods present there run command if needed and create snapshots.
-* 4. __How to make upgrades i.e. manage versions__: I don't manage versioning yet, but I have clues that __as long as any change to the repository and/or the events are adding new behavior without changing previous behavior__ then the following steps should be safe to deploy upgrades:
+* 4. __How to make upgrades i.e. manage versions__: I don't manage versioning yet, but when you add behavior to the aggregate without changing previous behavior then I know that a simple solution is:
 * * A. when the new version of your root class is ready (i.e. the new version of the todo), then just deploy it, and delete all the snapshots entries in the snapshots table. What will happen is that the snapshot in the new format will be rebuilt, after restart or after an event.
 * * B. Deploy the part related to new events (Processable), commands (Executable) and App (App.fs exposing the business logic to outside).
 * * C. Make the new behavior available by extending the interface used by SAFE (i.e. the ITodosApi) and its implementation (todosapi in [Server.fs](./src/Server/Server.fs))
-* * Basically: under the acceptable assumption that we just extend, and not change, versioning should not be a problem.
-
+* * Basically: under the acceptable assumption that when upgrading we just extend, and not change the aggregate (substitution principle), then any upgrade should not be a problem.
 
 Other "dispatching" logic work in the same way as they original are part of the way the original SAFE example. (i.e. ITodosApi and  interface and implementation)
 
 ## Installation
-The ordinary SAFE requirement (as follows) plus a postgres database using the Schema.sql script to create user, database, and tables
+The ordinary SAFE requirement (as follows) plus a postgres database using the Schema.sql script to create user, database, and tables.
 
-## Notes:
-My approach is quite unconventional at the moment: Events can return Error, and commands just pre-apply events to the state and see if the result is not an error, and only in that case they return the events. This can change to comply to the standard approach, so that events will never return errors.
+#### What follows now is the original SAFE doc
+
 
 # SAFE Template
-
 
 This template can be used to generate a full-stack web application using the [SAFE Stack](https://safe-stack.github.io/). It was created using the dotnet [SAFE Template](https://safe-stack.github.io/docs/template-overview/). If you want to learn more about the template why not start with the [quick start](https://safe-stack.github.io/docs/quickstart/) guide?
 
