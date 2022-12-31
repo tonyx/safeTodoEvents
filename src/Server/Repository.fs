@@ -10,13 +10,14 @@ open Shared.EventSourcing
 open Newtonsoft.Json
 
 module Repository =
+    let db: EStorage = Db'.pgDb()
     open BackEnd
     let ceResult = CeResultBuilder()
 
     let inline getLastSnapshot<'H> (zero: 'H) =
         ceResult {
             let! result =
-                match Db.tryGetLastSnapshot()  with
+                match db.TryGetLastSnapshot()  with
                 | Some (id, json) ->
                     let state = json |> deserialize<'H>
                     match state with
@@ -29,7 +30,7 @@ module Repository =
     let getState<'H, 'E when 'E :> Processable<'H>> (zero: 'H) =
         ceResult {
             let! (id, state) = getLastSnapshot<'H> (zero)
-            let events = Db.getEventsAfterId id
+            let events = db.GetEventsAfterId id
             let lastId =
                 match events.Length with
                 | x when x > 0 -> events |> List.last |> fst
@@ -49,7 +50,7 @@ module Repository =
                 state
                 |> command.Execute
             let! eventsAdded =
-                Db.addEvents (events |>> JsonConvert.SerializeObject)
+                db.AddEvents (events |>> JsonConvert.SerializeObject)
             return eventsAdded
         }
 
@@ -58,14 +59,14 @@ module Repository =
             {
                 let! (id, state) = getState<'H, 'E> (zero: 'H)
                 let snapshot = state |> JsonConvert.SerializeObject
-                let! result = Db.setSnapshot id snapshot
+                let! result = db.SetSnapshot (id, snapshot)
                 return result
             }
 
     let mksnapshotIfInterval<'H, 'E when 'E :> Processable<'H>> (zero: 'H) =
         ceResult
             {
-                let! lastEventId = Db.getLastEventId() |> optionToResult
+                let! lastEventId = db.TryGetLastEventId() |> optionToResult
                 let! lastSnapshot = getLastSnapshot<'H> (zero)
                 let snapId = lastSnapshot |> fst
                 let! result =
