@@ -7,6 +7,8 @@ open Shared
 open Shared.Utils
 
 type json = string
+
+[<CLIMutable>]
 type StorageEvent =
     {
         Event: json
@@ -19,98 +21,98 @@ type EStorage =
     abstract member TryGetLastEventId: unit -> Option<int>
     abstract member TryGetEvent: int -> Option<StorageEvent>
     abstract member SetSnapshot: int * string -> Result<unit, string>
-    abstract member AddEvents: List<json> -> Result<List<int>, string>
+    abstract member AddEvents: List<json> -> Result<unit, string>
     abstract member GetEventsAfterId: int -> List<int * string >
 
 module Db' =
     let TPConnectionString = Conf.connectionString
     let ceResult = CeResultBuilder()
-    type pgDb =
+    type PgDb =
         new() = {}
-        with
-            interface EStorage with
-                member this.DeleteAllEvents() =
-                    if (Conf.isTestEnv) then
-                        let _ =
-                            TPConnectionString
-                            |> Sql.connect
-                            |> Sql.query "DELETE from snapshots"
-                            |> Sql.executeNonQuery
-                        let _ =
-                            TPConnectionString
-                            |> Sql.connect
-                            |> Sql.query "DELETE from events"
-                            |> Sql.executeNonQuery
-                        ()
-                    else
-                        failwith "operation allowed only in test db"
+        interface EStorage with
+            member this.DeleteAllEvents() =
+                if (Conf.isTestEnv) then
+                    let _ =
+                        TPConnectionString
+                        |> Sql.connect
+                        |> Sql.query "DELETE from snapshots"
+                        |> Sql.executeNonQuery
+                    let _ =
+                        TPConnectionString
+                        |> Sql.connect
+                        |> Sql.query "DELETE from events"
+                        |> Sql.executeNonQuery
+                    ()
+                else
+                    failwith "operation allowed only in test db"
 
-                member this.TryGetLastSnapshot() =
-                    TPConnectionString
-                    |> Sql.connect
-                    |> Sql.query "SELECT event_id, snapshot FROM snapshots ORDER BY id DESC LIMIT 1"
-                    |> Sql.executeAsync (fun read ->
-                        (
-                            read.int "event_id",
-                            read.text "snapshot"
-                        )
+            member this.TryGetLastSnapshot() =
+                TPConnectionString
+                |> Sql.connect
+                |> Sql.query "SELECT event_id, snapshot FROM snapshots ORDER BY id DESC LIMIT 1"
+                |> Sql.executeAsync (fun read ->
+                    (
+                        read.int "event_id",
+                        read.text "snapshot"
+                    )
+                )
+                |> Async.AwaitTask
+                |> Async.RunSynchronously
+                |> Seq.tryHead
+
+            member this.TryGetLastEventId() =
+                TPConnectionString
+                |> Sql.connect
+                |> Sql.query "SELECT id from events ORDER BY id DESC LIMIT 1"
+                |> Sql.executeAsync  (fun read -> read.int "id")
+                |> Async.AwaitTask
+                |> Async.RunSynchronously
+                |> Seq.tryHead
+
+            member this.TryGetEvent id =
+                TPConnectionString
+                |> Sql.connect
+                |> Sql.query "SELECT * from events where id = @id"
+                |> Sql.parameters ["id", Sql.int id]
+                |> Sql.executeAsync
+                    (
+                        fun read ->
+                        {
+                            Id = read.int "id"
+                            Event = read.string "event"
+                            Timestamp = read.dateTime "timestamp"
+                        }
                     )
                     |> Async.AwaitTask
                     |> Async.RunSynchronously
                     |> Seq.tryHead
 
-                member this.TryGetLastEventId() =
-                    TPConnectionString
-                    |> Sql.connect
-                    |> Sql.query "SELECT id from events ORDER BY id DESC LIMIT 1"
-                    |> Sql.executeAsync  (fun read -> read.int "id")
-                    |> Async.AwaitTask
-                    |> Async.RunSynchronously
-                    |> Seq.tryHead
-
-                member this.TryGetEvent id =
-                    TPConnectionString
-                    |> Sql.connect
-                    |> Sql.query "SELECT * from events where id = @id"
-                    |> Sql.parameters ["id", Sql.int id]
-                    |> Sql.executeAsync
-                        (
-                            fun read ->
-                            {
-                                Id = read.int "id"
-                                Event = read.string "event"
-                                Timestamp = read.dateTime "timestamp"
-                            }
-                        )
-                        |> Async.AwaitTask
-                        |> Async.RunSynchronously
-                        |> Seq.tryHead
-
-                member this.SetSnapshot (id: int, snapshot: json) =
-                    ceResult
-                        {
-                            let! event = ((this :> EStorage).TryGetEvent id) |> optionToResult
-                            let _ =
-                                TPConnectionString
-                                |> Sql.connect
-                                |> Sql.executeTransactionAsync
-                                    [
-                                        "INSERT INTO snapshots (event_id, snapshot, timestamp) VALUES (@event_id, @snapshot, @timestamp)",
+            member this.SetSnapshot (id: int, snapshot: json) =
+                ceResult
+                    {
+                        let! event = ((this :> EStorage).TryGetEvent id) |> optionToResult
+                        let _ =
+                            TPConnectionString
+                            |> Sql.connect
+                            |> Sql.executeTransactionAsync
+                                [
+                                    "INSERT INTO snapshots (event_id, snapshot, timestamp) VALUES (@event_id, @snapshot, @timestamp)",
+                                        [
                                             [
-                                                [
-                                                    ("@event_id", Sql.int event.Id);
-                                                    ("snapshot",  Sql.jsonb snapshot);
-                                                    ("timestamp", Sql.timestamp event.Timestamp)
-                                                ]
+                                                ("@event_id", Sql.int event.Id);
+                                                ("snapshot",  Sql.jsonb snapshot);
+                                                ("timestamp", Sql.timestamp event.Timestamp)
                                             ]
-                                    ]
-                                |> Async.AwaitTask
-                                |> Async.RunSynchronously
-                            return ()
-                        }
+                                        ]
+                                ]
+                            |> Async.AwaitTask
+                            |> Async.RunSynchronously
+                        return ()
+                    }
 
-                member this.AddEvents (events: List<json>) =
-                    try
+            member this.AddEvents (events: List<json>) =
+                try
+                    let _ =
                         TPConnectionString
                         |> Sql.connect
                         |> Sql.executeTransactionAsync
@@ -128,21 +130,21 @@ module Db' =
                             ]
                             |> Async.AwaitTask
                             |> Async.RunSynchronously
-                            |> Ok
-                    with
-                        | _ as ex -> (ex.ToString()) |> Error
+                    () |> Ok
+                with
+                    | _ as ex -> (ex.ToString()) |> Error
 
-                member this.GetEventsAfterId id =
-                    TPConnectionString
-                    |> Sql.connect
-                    |> Sql.query "SELECT id, event FROM events WHERE id > @id ORDER BY id"
-                    |> Sql.parameters ["id", Sql.int id]
-                    |> Sql.executeAsync ( fun read ->
-                        (
-                            read.int "id",
-                            read.text "event"
-                        )
+            member this.GetEventsAfterId id =
+                TPConnectionString
+                |> Sql.connect
+                |> Sql.query "SELECT id, event FROM events WHERE id > @id ORDER BY id"
+                |> Sql.parameters ["id", Sql.int id]
+                |> Sql.executeAsync ( fun read ->
+                    (
+                        read.int "id",
+                        read.text "event"
                     )
-                    |> Async.AwaitTask
-                    |> Async.RunSynchronously
-                    |> Seq.toList
+                )
+                |> Async.AwaitTask
+                |> Async.RunSynchronously
+                |> Seq.toList

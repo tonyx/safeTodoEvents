@@ -10,8 +10,8 @@ open Shared.EventSourcing
 open Newtonsoft.Json
 
 module Repository =
-    let db: EStorage = Db'.pgDb()
-    open BackEnd
+    // let db: EStorage = Db'.PgDb()
+    let db: EStorage = MemoryStorage.MemoryDb()
     let ceResult = CeResultBuilder()
 
     let inline getLastSnapshot<'H> (zero: 'H) =
@@ -70,7 +70,7 @@ module Repository =
                 let! lastSnapshot = getLastSnapshot<'H> (zero)
                 let snapId = lastSnapshot |> fst
                 let! result =
-                    if ((lastEventId - snapId) > Conf.intervalBetweenSnapshots) then
+                    if ((lastEventId - snapId) > Conf.intervalBetweenSnapshots || snapId = 0) then
                         mksnapshot<'H, 'E> (zero)
                     else
                         () |> Ok
