@@ -10,14 +10,17 @@ open Shared.EventSourcing
 open Newtonsoft.Json
 
 module Repository =
-    // let db: EStorage = Db'.PgDb()
-    let db: EStorage = MemoryStorage.MemoryDb()
+    let storage: EStorage =
+        match Conf.storageType with
+            | Conf.StorageType.Memory -> MemoryStorage.MemoryStorage()
+            | Conf.StorageType.Postgres -> DbStorage.PgDb()
+
     let ceResult = CeResultBuilder()
 
     let inline getLastSnapshot<'H> (zero: 'H) =
         ceResult {
             let! result =
-                match db.TryGetLastSnapshot()  with
+                match storage.TryGetLastSnapshot()  with
                 | Some (id, json) ->
                     let state = json |> deserialize<'H>
                     match state with
@@ -30,7 +33,7 @@ module Repository =
     let getState<'H, 'E when 'E :> Processable<'H>> (zero: 'H) =
         ceResult {
             let! (id, state) = getLastSnapshot<'H> (zero)
-            let events = db.GetEventsAfterId id
+            let events = storage.GetEventsAfterId id
             let lastId =
                 match events.Length with
                 | x when x > 0 -> events |> List.last |> fst
@@ -50,7 +53,7 @@ module Repository =
                 state
                 |> command.Execute
             let! eventsAdded =
-                db.AddEvents (events |>> JsonConvert.SerializeObject)
+                storage.AddEvents (events |>> JsonConvert.SerializeObject)
             return eventsAdded
         }
 
@@ -59,14 +62,14 @@ module Repository =
             {
                 let! (id, state) = getState<'H, 'E> (zero: 'H)
                 let snapshot = state |> JsonConvert.SerializeObject
-                let! result = db.SetSnapshot (id, snapshot)
+                let! result = storage.SetSnapshot (id, snapshot)
                 return result
             }
 
     let mksnapshotIfInterval<'H, 'E when 'E :> Processable<'H>> (zero: 'H) =
         ceResult
             {
-                let! lastEventId = db.TryGetLastEventId() |> optionToResult
+                let! lastEventId = storage.TryGetLastEventId() |> optionToResult
                 let! lastSnapshot = getLastSnapshot<'H> (zero)
                 let snapId = lastSnapshot |> fst
                 let! result =

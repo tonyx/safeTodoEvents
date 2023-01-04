@@ -7,13 +7,6 @@ open System
 
 module MemoryStorage =
     open BackEnd
-    [<CLIMutable>]
-    type DbSnapshot = {
-        Id: int
-        Snapshot: string
-        TimeStamp: DateTime
-        EventId: int
-    }
 
     let mutable event_id_seq = 1
     let mutable snapshot_id_seq = 1
@@ -31,9 +24,9 @@ module MemoryStorage =
         result
 
     let mutable events:List<StorageEvent> = []
-    let mutable snapshots:List<DbSnapshot> = []
+    let mutable snapshots:List<StorageSnapshot> = []
 
-    type MemoryDb =
+    type MemoryStorage =
         new() =  {}
         interface EStorage with
             member this.DeleteAllEvents() =

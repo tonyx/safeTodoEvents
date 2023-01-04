@@ -6,7 +6,6 @@ let all =
     testList "All"
         [
             AppTests.appTests
-            Shared.Tests.shared
             Shared.Tests.domain
         ]
 

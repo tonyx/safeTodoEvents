@@ -6,8 +6,8 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="paket.references" />
-    <Compile Include="Db.fs" />
-    <Compile Include="MemoryDb.fs" />
+    <Compile Include="DbStorage.fs" />
+    <Compile Include="MemoryStorage.fs" />
     <Compile Include="Repository.fs" />
     <Compile Include="App.fs" />
     <Compile Include="Server.fs" />

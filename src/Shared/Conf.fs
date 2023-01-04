@@ -3,6 +3,10 @@ namespace Shared
 open FSharp.Core
 
 module Conf =
+    type StorageType = Postgres | Memory
+
+    let storageType = Memory
+
     let isTestEnv = true
     // atm there is only one db, but here I point out that we need different rights in
     // dev/test and in prod respectively.
@@ -24,3 +28,4 @@ module Conf =
 
     let intervalBetweenSnapshots = 10
     let cacheSize = 13
+

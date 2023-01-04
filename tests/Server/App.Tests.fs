@@ -9,7 +9,7 @@ open Shared
 open Server
 open TodoEvents
 
-let db = Repository.db
+let db = Repository.storage
 
 let appTests =
     testSequenced
@@ -42,7 +42,7 @@ let appTests =
                 let retrieved' = App.getAllTodos () |> Result.get
                 Expect.isEmpty retrieved' "should be empty"
 
-            testCase "get zero state"
+            testCase "delete all events so that the current state is the init/zero state"
             <| fun _ ->
                 db.DeleteAllEvents()
 
@@ -51,7 +51,6 @@ let appTests =
                     |> Result.get
 
                 Expect.equal state Todos.Todos.Zero "shold be equal"
-                Expect.isTrue true "true"
 
             testCase "after adding an event, the state is not zero"
             <| fun _ ->
@@ -100,7 +99,7 @@ let appTests =
                 let expected = { Todos.Todos.Zero with todos = [ todo ] }
                 Expect.equal (snapValue |> Result.get) expected "should be equal"
 
-            testCase "add and event and then get the state"
+            testCase "after adding and addtodo event, then state is the zero plus the todo just added"
             <| fun _ ->
                 db.DeleteAllEvents()
 
@@ -120,7 +119,7 @@ let appTests =
                 let expected = { Todos.Todos.Zero with todos = [ todo ] }
                 Expect.equal state expected "should be equal"
 
-            testCase "add two events and then get the state"
+            testCase "add two addTodos events and then check that the state includes them"
             <| fun _ ->
                 db.DeleteAllEvents()
 
@@ -151,7 +150,7 @@ let appTests =
                 let expected = { Todos.Todos.Zero with todos = ([ todo2; todo ] |> List.sort) }
                 Expect.equal state' expected "should be equal"
 
-            testCase "after two events and then get the snapshot updated only to the first todo"
+            testCase "add two addTodo events. The snapshot will by updated only to the first todo"
             <| fun _ ->
                 db.DeleteAllEvents()
 
@@ -207,33 +206,6 @@ let appTests =
                     |> Result.get
 
                 Expect.equal state snapshotState "should be equal"
-
-            testCase "add few todos and then the last snapshot will be unaligned respect of the current state"
-            <| fun _ ->
-                db.DeleteAllEvents()
-                let evs = db.GetEventsAfterId 0
-                Expect.isEmpty evs "should be empty"
-
-                let initSnapshot = db.TryGetLastSnapshot()
-                Expect.isNone initSnapshot "should be none"
-
-                let todo =
-                    {
-                        Id = Guid.NewGuid()
-                        Description = "write some tests x"
-                    }
-
-                let added = App.addTodo todo
-                Expect.isOk added "should be ok"
-
-                let todo' =
-                    {
-                        Id = Guid.NewGuid()
-                        Description = "write more and more tests"
-                    }
-
-                let added' = App.addTodo todo'
-                Expect.isOk added' "should be ok"
 
             testCase "add a todo and then get state"
             <| fun _ ->

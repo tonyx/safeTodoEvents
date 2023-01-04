@@ -11,14 +11,12 @@ open Expecto
 
 open Shared
 
-let shared = testList "Shared" [
+let domain = testList "Todos domain members" [
     testCase "Empty string is not a valid description" <| fun _ ->
         let expected = false
         let actual = Todo.isValid ""
         Expect.equal actual expected "Should be false"
-]
 
-let domain = testList "Todos domain members" [
     testCase "add any new todo - ok" <| fun _ ->
         let todos = Todos.Zero
         let todo = {

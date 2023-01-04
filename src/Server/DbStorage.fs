@@ -8,13 +8,18 @@ open Shared.Utils
 
 type json = string
 
-[<CLIMutable>]
 type StorageEvent =
     {
         Event: json
         Id: int
         Timestamp: System.DateTime
     }
+type StorageSnapshot = {
+    Id: int
+    Snapshot: json
+    TimeStamp: System.DateTime
+    EventId: int
+}
 type EStorage =
     abstract member DeleteAllEvents: unit -> unit
     abstract member TryGetLastSnapshot: unit -> Option<int * json>
@@ -24,7 +29,7 @@ type EStorage =
     abstract member AddEvents: List<json> -> Result<unit, string>
     abstract member GetEventsAfterId: int -> List<int * string >
 
-module Db' =
+module DbStorage =
     let TPConnectionString = Conf.connectionString
     let ceResult = CeResultBuilder()
     type PgDb =
