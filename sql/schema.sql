@@ -64,10 +64,10 @@ ALTER TABLE public.events ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: eventsid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: snapshots_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public.eventsid_seq
+CREATE SEQUENCE public.snapshots_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -75,14 +75,14 @@ CREATE SEQUENCE public.eventsid_seq
     CACHE 1;
 
 
-ALTER TABLE public.eventsid_seq OWNER TO postgres;
+ALTER TABLE public.snapshots_id_seq OWNER TO postgres;
 
 --
 -- Name: snapshots; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.snapshots (
-    id integer DEFAULT nextval('public.eventsid_seq'::regclass) NOT NULL,
+    id integer DEFAULT nextval('public.snapshots_id_seq'::regclass) NOT NULL,
     snapshot json NOT NULL,
     event_id integer NOT NULL,
     "timestamp" timestamp without time zone NOT NULL
@@ -115,10 +115,10 @@ SELECT pg_catalog.setval('public.events_id_seq', 8408, true);
 
 
 --
--- Name: eventsid_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: snapshots_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.eventsid_seq', 1038, true);
+SELECT pg_catalog.setval('public.snapshots_id_seq', 1038, true);
 
 
 --
@@ -168,10 +168,10 @@ GRANT ALL ON SEQUENCE public.events_id_seq TO todo;
 
 
 --
--- Name: SEQUENCE eventsid_seq; Type: ACL; Schema: public; Owner: postgres
+-- Name: SEQUENCE snapshots_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT ALL ON SEQUENCE public.eventsid_seq TO todo;
+GRANT ALL ON SEQUENCE public.snapshots_id_seq TO todo;
 
 
 --
