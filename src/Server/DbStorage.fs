@@ -24,6 +24,7 @@ type EStorage =
     abstract member DeleteAllEvents: unit -> unit
     abstract member TryGetLastSnapshot: unit -> Option<int * json>
     abstract member TryGetLastEventId: unit -> Option<int>
+    abstract member TryGetLastSnapshotEventId: unit -> Option<int>
     abstract member TryGetEvent: int -> Option<StorageEvent>
     abstract member SetSnapshot: int * string -> Result<unit, string>
     abstract member AddEvents: List<json> -> Result<unit, string>
@@ -70,6 +71,15 @@ module DbStorage =
                 |> Sql.connect
                 |> Sql.query "SELECT id from events ORDER BY id DESC LIMIT 1"
                 |> Sql.executeAsync  (fun read -> read.int "id")
+                |> Async.AwaitTask
+                |> Async.RunSynchronously
+                |> Seq.tryHead
+
+            member this.TryGetLastSnapshotEventId() =
+                TPConnectionString
+                |> Sql.connect
+                |> Sql.query "SELECT event_id from snapshots ORDER BY id DESC LIMIT 1"
+                |> Sql.executeAsync  (fun read -> read.int "event_id")
                 |> Async.AwaitTask
                 |> Async.RunSynchronously
                 |> Seq.tryHead

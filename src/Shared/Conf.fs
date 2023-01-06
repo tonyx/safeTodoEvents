@@ -5,7 +5,7 @@ open FSharp.Core
 module Conf =
     type StorageType = Postgres | Memory
 
-    let storageType = Memory
+    let storageType = Postgres
 
     let isTestEnv = true
     // atm there is only one db, but here I point out that we need different rights in
@@ -26,6 +26,7 @@ module Conf =
             "User Id=todo;"+
             "Password=todo;"
 
-    let intervalBetweenSnapshots = 10
+    let intervalBetweenSnapshots = 5
+
     let cacheSize = 13
 

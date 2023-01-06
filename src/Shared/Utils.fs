@@ -48,3 +48,8 @@ module Utils =
         match x with
         | true -> x |> Ok
         | false -> Error "false"
+
+    let optionToDefault d x=
+        match x with
+        | Some y -> y
+        | None -> d

@@ -70,10 +70,10 @@ module Repository =
         ceResult
             {
                 let! lastEventId = storage.TryGetLastEventId() |> optionToResult
-                let! lastSnapshot = getLastSnapshot<'H> (zero)
-                let snapId = lastSnapshot |> fst
+                let snapEventId = storage.TryGetLastSnapshotEventId() |> optionToDefault 0
+
                 let! result =
-                    if ((lastEventId - snapId) > Conf.intervalBetweenSnapshots || snapId = 0) then
+                    if ((lastEventId - snapEventId) > Conf.intervalBetweenSnapshots || snapEventId = 0) then
                         mksnapshot<'H, 'E> (zero)
                     else
                         () |> Ok

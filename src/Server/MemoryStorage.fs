@@ -38,6 +38,8 @@ module MemoryStorage =
                 snapshots |> List.tryLast |>> (fun x -> (x.Id, x.Snapshot))
             member this.TryGetLastEventId() =
                 events |> List.tryLast |>> (fun x -> x.Id)
+            member this.TryGetLastSnapshotEventId() =
+                snapshots |> List.tryLast |>> (fun x -> x.EventId)
             member this.TryGetEvent(id: int) =
                 events |> List.tryFind (fun x -> x.Id = id)
             member this.AddEvents (events') =
