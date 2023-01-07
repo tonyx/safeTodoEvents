@@ -20,7 +20,7 @@ type StorageSnapshot = {
     TimeStamp: System.DateTime
     EventId: int
 }
-type EStorage =
+type IStorage =
     abstract member DeleteAllEvents: unit -> unit
     abstract member TryGetLastSnapshot: unit -> Option<int * json>
     abstract member TryGetLastEventId: unit -> Option<int>
@@ -35,7 +35,7 @@ module DbStorage =
     let ceResult = CeResultBuilder()
     type PgDb =
         new() = {}
-        interface EStorage with
+        interface IStorage with
             member this.DeleteAllEvents() =
                 if (Conf.isTestEnv) then
                     let _ =
@@ -105,7 +105,7 @@ module DbStorage =
             member this.SetSnapshot (id: int, snapshot: json) =
                 ceResult
                     {
-                        let! event = ((this :> EStorage).TryGetEvent id) |> optionToResult
+                        let! event = ((this :> IStorage).TryGetEvent id) |> optionToResult
                         let _ =
                             TPConnectionString
                             |> Sql.connect

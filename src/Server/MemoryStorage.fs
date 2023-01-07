@@ -28,7 +28,7 @@ module MemoryStorage =
 
     type MemoryStorage =
         new() =  {}
-        interface EStorage with
+        interface IStorage with
             member this.DeleteAllEvents() =
                 events <- []
                 snapshots <- []

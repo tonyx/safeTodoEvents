@@ -10,7 +10,7 @@ open Shared.EventSourcing
 open Newtonsoft.Json
 
 module Repository =
-    let storage: EStorage =
+    let storage: IStorage =
         match Conf.storageType with
             | Conf.StorageType.Memory -> MemoryStorage.MemoryStorage()
             | Conf.StorageType.Postgres -> DbStorage.PgDb()
