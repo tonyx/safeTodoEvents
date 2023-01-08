@@ -34,6 +34,15 @@ let todosApi =
                         | Ok _ -> guid
                         | Error x -> failwith x
                 }
+        getAverageTime =
+            fun () ->
+                async
+                    {
+                        return
+                            match (BackEnd.App.AverageTime()) with
+                            | Ok t -> t
+                            | Error x -> failwith x
+                    }
     }
 
 let webApp =

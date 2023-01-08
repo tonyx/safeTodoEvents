@@ -5,10 +5,11 @@ open Fable.Remoting.Client
 open Shared
 open System
 
-type Model = { Todos: Todo list; Input: string }
+type Model = { Todos: Todo list; Input: string; Average: int }
 
 type Msg =
     | GotTodos of Todo list
+    | GotAverage of int
     | SetInput of string
     | AddTodo
     | AddedTodo of Todo
@@ -22,7 +23,7 @@ let todosApi =
     |> Remoting.buildProxy<ITodosApi>
 
 let init () : Model * Cmd<Msg> =
-    let model = { Todos = []; Input = "" }
+    let model = { Todos = []; Input = ""; Average = 0 }
 
     let cmd = Cmd.OfAsync.perform todosApi.getTodos () GotTodos
 
@@ -30,7 +31,10 @@ let init () : Model * Cmd<Msg> =
 
 let update (msg: Msg) (model: Model) : Model * Cmd<Msg> =
     match msg with
-    | GotTodos todos -> { model with Todos = todos }, Cmd.none
+    | GotTodos todos ->
+        let cmd = Cmd.OfAsync.perform todosApi.getAverageTime () GotAverage
+        { model with Todos = todos }, cmd
+    | GotAverage average -> {model with Average = average}, Cmd.none
     | SetInput value -> { model with Input = value }, Cmd.none
     | AddTodo ->
         let todo = Todo.create model.Input
@@ -84,8 +88,11 @@ let containerBox (model: Model) (dispatch: Msg -> unit) =
                     prop.children [
                         Bulma.input.text [
                             prop.value model.Input
-                            prop.placeholder "What needs to be done?"
+                            prop.placeholder "What needs to be f. done?"
                             prop.onChange (fun x -> SetInput x |> dispatch)
+                        ]
+                        Bulma.box [
+                            prop.text (sprintf "average: %d" (model.Average))
                         ]
                     ]
                 ]

@@ -10,7 +10,9 @@ module Utils =
         try
             json |> JsonConvert.DeserializeObject<'H> |> Ok
         with
-        | ex  -> Error (ex.ToString())
+        | ex  ->
+            printf "error deserialize: %A" ex
+            Error (ex.ToString())
     type CeResultBuilder()  =
         member this.Bind(x, f) =
             match x with

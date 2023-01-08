@@ -35,14 +35,54 @@ module Todos =
     open Shared
     open Utils
 
+    type Projection1 =
+        {
+            timeAdded: Map<Guid, DateTime>
+            timeRemoved: Map<Guid, DateTime>
+        }
+        with
+            member this.AddTodo(todo) =
+                {
+                    this with
+                        timeAdded = this.timeAdded.Add(todo.Id, DateTime.Now)
+                }
+            member this.RemoveTodo(id) =
+                {
+                    this with
+                        timeRemoved = this.timeRemoved.Add(id, DateTime.Now)
+                }
+            member this.AverageTodoTime() =
+                let addedAndFinished =
+                    this.timeAdded.Keys |> Set.ofSeq |> Set.intersect (this.timeRemoved.Keys |> Set.ofSeq)
+                let times =
+                    addedAndFinished
+                    |>>
+                    (fun x ->
+                        let startedAt = this.timeAdded.[x]
+                        let finishedAt = this.timeRemoved.[x]
+                        let interval = finishedAt.Subtract(startedAt)
+                        interval.Milliseconds
+                    )
+                let total =
+                    times
+                    |> Set.fold (fun x y -> x + y) 0
+                let average = (double)total /(double)(addedAndFinished.Count)
+                average
+
     type Todos =
         {
             todos: List<Todo>
+            projection1: Projection1
         }
         with
             static member Zero =
                 {
                     todos = []
+                    projection1 =
+                        {
+                            timeAdded = [] |> Map.ofList
+                            timeRemoved = [] |> Map.ofList
+                        }
                 }
             member this.AddTodo (t: Todo) =
                 ceResult {
@@ -51,10 +91,12 @@ module Todos =
                         |> List.exists (fun x -> x.Description = t.Description)
                         |> not
                         |> boolToResult
+                    let projection  = this.projection1.AddTodo t
                     let result =
                         {
                             this with
                                 todos = t::this.todos
+                                projection1 = projection
                         }
                     return result
                 }
@@ -64,10 +106,12 @@ module Todos =
                         this.todos
                         |> List.exists (fun x -> x.Id = id)
                         |> boolToResult
+                    let projection = this.projection1.RemoveTodo id
                     let result =
                         {
                             this with
                                 todos = this.todos |> List.filter (fun x -> x.Id <> id)
+                                projection1 = projection
                         }
                     return result
                 }
