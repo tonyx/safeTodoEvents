@@ -34,7 +34,22 @@ module Cache =
 module Todos =
     open Shared
     open Utils
+    // type ConcreteConverter<'T>() =
+    //     inherit JsonConverter()
+    //     override this.CanConvert(objectType: System.Type): bool = true
+    //     override this.CanRead: bool = true
+    //     override this.CanWrite: bool = true
+    //     override this.ReadJson(reader: JsonReader, objectType: System.Type, existingValue: obj, serializer: JsonSerializer): obj =
+    //         printf "XXXX: trying to deserialize\n"
+    //         serializer.Deserialize<'T> reader
+    //     override this.WriteJson(writer: JsonWriter, value: obj, serializer: JsonSerializer): unit =
+    //         serializer.Serialize(writer, value)
 
+    type Projection =
+        abstract member AddTodo: Todo -> Projection
+        abstract member RemoveTodo: Guid -> Projection
+
+    // [<Newtonsoft.Json.JsonConverter(typedefof<ConcreteConverter<Projection1>>)>]
     type Projection1 =
         {
             timeAdded: Map<Guid, DateTime>
@@ -91,6 +106,7 @@ module Todos =
                         |> List.exists (fun x -> x.Description = t.Description)
                         |> not
                         |> boolToResult
+                    // let projection  = (this.projection1:>Projection).AddTodo t
                     let projection  = this.projection1.AddTodo t
                     let result =
                         {
@@ -119,6 +135,7 @@ module Todos =
 
 module TodoEvents =
     open Todos
+
     type Event =
         | TodoAdded of Todo
         | TodoRemoved of Guid
