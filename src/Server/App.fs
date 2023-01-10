@@ -39,41 +39,38 @@ module Todos' =
         abstract member AddTodo: Todo -> Projection
         abstract member RemoveTodo: Guid -> Projection
 
-    // [<Newtonsoft.Json.JsonConverter(typedefof<Repository.ConcreteConverter<Projection1>>)>]
     type Projection1 =
         {
             timeAdded: Map<Guid, DateTime>
             timeRemoved: Map<Guid, DateTime>
         }
-
-        with
-            member this.AddTodo(todo) =
-                {
-                    this with
-                        timeAdded = this.timeAdded.Add(todo.Id, DateTime.Now)
-                }
-            member this.RemoveTodo(id) =
-                {
-                    this with
-                        timeRemoved = this.timeRemoved.Add(id, DateTime.Now)
-                }
-            member this.AverageTodoTime() =
-                let addedAndFinished =
-                    this.timeAdded.Keys |> Set.ofSeq |> Set.intersect (this.timeRemoved.Keys |> Set.ofSeq)
-                let times =
-                    addedAndFinished
-                    |>>
-                    (fun x ->
-                        let startedAt = this.timeAdded.[x]
-                        let finishedAt = this.timeRemoved.[x]
-                        let interval = finishedAt.Subtract(startedAt)
-                        interval.Milliseconds
-                    )
-                let total =
-                    times
-                    |> Set.fold (fun x y -> x + y) 0
-                let average = (double)total /(double)(addedAndFinished.Count)
-                average
+        member this.AddTodo(todo) =
+            {
+                this with
+                    timeAdded = this.timeAdded.Add(todo.Id, DateTime.Now)
+            }
+        member this.RemoveTodo(id) =
+            {
+                this with
+                    timeRemoved = this.timeRemoved.Add(id, DateTime.Now)
+            }
+        member this.AverageTodoTime() =
+            let addedAndFinished =
+                this.timeAdded.Keys |> Set.ofSeq |> Set.intersect (this.timeRemoved.Keys |> Set.ofSeq)
+            let times =
+                addedAndFinished
+                |>>
+                (fun x ->
+                    let startedAt = this.timeAdded.[x]
+                    let finishedAt = this.timeRemoved.[x]
+                    let interval = finishedAt.Subtract(startedAt)
+                    interval.Milliseconds
+                )
+            let total =
+                times
+                |> Set.fold (fun x y -> x + y) 0
+            let average = (double)total /(double)(addedAndFinished.Count)
+            average
 
     type Todos =
         {
@@ -97,13 +94,12 @@ module Todos' =
                         |> List.exists (fun x -> x.Description = t.Description)
                         |> not
                         |> boolToResult
-                    // let projection  = (this.projection1:>Projection).AddTodo t
-                    // let projection  = this.projection1.AddTodo t
+                    let projection  = this.projection1.AddTodo t
                     let result =
                         {
                             this with
                                 todos = t::this.todos
-                                // projection1 = projection
+                                projection1 = projection
                         }
                     return result
                 }
@@ -113,12 +109,12 @@ module Todos' =
                         this.todos
                         |> List.exists (fun x -> x.Id = id)
                         |> boolToResult
-                    // let projection = this.projection1.RemoveTodo id
+                    let projection = this.projection1.RemoveTodo id
                     let result =
                         {
                             this with
                                 todos = this.todos |> List.filter (fun x -> x.Id <> id)
-                                // projection1 = projection
+                                projection1 = projection
                         }
                     return result
                 }
@@ -183,12 +179,9 @@ module App =
         }
 
     let addTodo todo =
-        printf "service add todo 0\n"
         ceResult {
-            printf "service add todo 1\n"
             let! _ =
                 todo |> Command.AddTodo |> (runCommand<Todos, Event> Todos.Zero)
-            printf "service add todo 2\n"
             return! (mksnapshotIfInterval<Todos, Event> Todos.Zero)
         }
 

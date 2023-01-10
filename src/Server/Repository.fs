@@ -10,19 +10,6 @@ open Shared.EventSourcing
 open Newtonsoft.Json
 
 module Repository =
-    let settings = JsonSerializerSettings()
-    settings.TypeNameHandling <- TypeNameHandling.Auto
-
-    type ConcreteConverter<'T>() =
-        inherit JsonConverter()
-        override this.CanConvert(objectType: System.Type): bool = true
-        override this.CanRead: bool = true
-        override this.CanWrite: bool = true
-        override this.ReadJson(reader: JsonReader, objectType: System.Type, existingValue: obj, serializer: JsonSerializer): obj =
-            serializer.Deserialize<'T> reader
-        override this.WriteJson(writer: JsonWriter, value: obj, serializer: JsonSerializer): unit =
-            serializer.Serialize(writer, value)
-
     let storage: IStorage =
         match Conf.storageType with
             | Conf.StorageType.Memory -> MemoryStorage.MemoryStorage()
@@ -30,7 +17,7 @@ module Repository =
 
     let ceResult = CeResultBuilder()
 
-    let inline getLastSnapshot<'H> (zero: 'H) =
+    let  getLastSnapshot<'H> (zero: 'H) =
         ceResult {
             let! result =
                 match storage.TryGetLastSnapshot()  with
@@ -74,8 +61,7 @@ module Repository =
         ceResult
             {
                 let! (id, state) = getState<'H, 'E> (zero: 'H)
-                // let snapshot = state |> JsonConvert.SerializeObject
-                let snapshot = JsonConvert.SerializeObject(state, settings)
+                let snapshot = state |> JsonConvert.SerializeObject
                 let! result = storage.SetSnapshot (id, snapshot)
                 return result
             }
