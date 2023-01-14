@@ -4,18 +4,19 @@ open Shared
 open FSharpPlus
 open System
 open Todos
+open Shared.Utils
 
 module Aggregate =
     type Aggregate =
         {
-            todos: Todos
-            projection: Projection1
+            todos: ITodo
+            projection: ITodo
         }
         with
             static member Zero =
                 {
                     todos = Todos.Zero
-                    projection = Projection1.Zero
+                    projection = Projection.Zero
                 }
             member this.AddTodo (t: Todo) =
                 ceResult
@@ -36,7 +37,8 @@ module Aggregate =
                         let! projection = this.projection.RemoveTodo id
                         return
                             {
-                                todos = todos
-                                projection = projection
+                                this with
+                                    todos = todos
+                                    projection = projection
                             }
                     }

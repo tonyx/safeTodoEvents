@@ -61,7 +61,8 @@ module Repository =
         ceResult
             {
                 let! (id, state) = getState<'H, 'E> (zero: 'H)
-                let snapshot = state |> JsonConvert.SerializeObject
+                // let snapshot = state |> JsonConvert.SerializeObject
+                let snapshot = JsonConvert.SerializeObject(state, Utils.serSettings)
                 let! result = storage.SetSnapshot (id, snapshot)
                 return result
             }

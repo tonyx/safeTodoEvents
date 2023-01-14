@@ -5,18 +5,17 @@ module App =
     open Todos
     open MetaEvents
     open MetaCommands
-    // open Aggregate
 
     let getAllTodos() =
         ceResult {
             let! (_, state) = getState<Aggregate.Aggregate, Event> Aggregate.Aggregate.Zero
-            let todos = state.todos.GetTodos()
+            let todos = (state.todos :?> Todos).GetTodos()
             return todos
         }
     let AverageTime() =
         ceResult {
             let! (_, state) = getState<Aggregate.Aggregate, Event> Aggregate.Aggregate.Zero
-            let averageTime = state.projection.AverageTodoTime()
+            let averageTime = (state.projection :?> Projection).AverageTodoTime()
             return (int) averageTime
         }
     let addTodo todo =
