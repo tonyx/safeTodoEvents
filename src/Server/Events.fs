@@ -13,6 +13,6 @@ module MetaEvents =
             interface Processable<Aggregate.Aggregate> with
                 member this.Process (x: Aggregate.Aggregate ) =
                     match this with
-                    | TodoAdded (t: Todo) -> x.AddTodo t
-                    | TodoRemoved (g: Guid) ->x.RemoveTodo g
+                    | TodoAdded (t: Todo) ->   x.AddTodo t
+                    | TodoRemoved (g: Guid) -> x.RemoveTodo g
 

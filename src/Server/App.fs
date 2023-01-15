@@ -15,7 +15,7 @@ module App =
     let AverageTime() =
         ceResult {
             let! (_, state) = getState<Aggregate.Aggregate, Event> Aggregate.Aggregate.Zero
-            let averageTime = (state.projection :?> Projection).AverageTodoTime()
+            let averageTime = (state.projection :?> Stat).AverageTodoTime()
             return (int) averageTime
         }
     let addTodo todo =

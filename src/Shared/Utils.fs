@@ -13,7 +13,6 @@ module Utils =
 
     let deserialize<'H> (json: string): Result<'H, string> =
         try
-            // json |> JsonConvert.DeserializeObject<'H> |> Ok
             JsonConvert.DeserializeObject<'H>(json, serSettings) |> Ok
         with
         | ex  ->

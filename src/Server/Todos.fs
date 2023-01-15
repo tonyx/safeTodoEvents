@@ -13,7 +13,9 @@ module Todos =
         abstract member RemoveTodo: Guid -> Result<ITodo, string>
 
     let ceResult = CeResultBuilder()
-    type Projection =
+
+
+    type Stat =
         {
             timeAdded: Map<Guid, DateTime>
             timeRemoved: Map<Guid, DateTime>
@@ -23,6 +25,42 @@ module Todos =
                 timeAdded = [] |> Map.ofList
                 timeRemoved = [] |> Map.ofList
             }
+
+        member this.Purge() =
+            let olds =
+                this.timeRemoved
+                |> Map.toList
+                |>>
+                    fun (x, y)
+                        ->
+                            if (DateTime.Now.Subtract(y).CompareTo(TimeSpan(10,0,0,0))>0) then
+                                x |> Some
+                            else
+                                None
+                |>
+                List.fold
+                    (fun acc x ->
+                        if (x.IsSome) then (x.Value::acc) else acc
+                    )
+                    []
+            let timeAddedPurged =
+                this.timeAdded
+                |> Map.toList
+                |> List.filter
+                    (fun (x, _) -> olds |> List.contains x)
+                |> Map.ofList
+
+            let timeRemovedPurged =
+                this.timeRemoved
+                |> Map.toList
+                |> List.filter
+                    (fun (x, _) -> olds |> List.contains x)
+                |> Map.ofList
+            {
+                    timeAdded = timeAddedPurged
+                    timeRemoved = timeRemovedPurged
+            }
+
         interface ITodo with
             member this.AddTodo(todo) =
                 {
