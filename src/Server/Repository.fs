@@ -3,6 +3,7 @@ namespace BackEnd
 
 open System.Runtime.CompilerServices
 open FSharp.Data.Sql
+open FSharp.Core
 open FSharpPlus
 open Shared
 open Shared.Utils
@@ -22,6 +23,7 @@ module Repository =
             let! result =
                 match storage.TryGetLastSnapshot()  with
                 | Some (id, json) ->
+                    // todo should memoize also this that follows
                     let state = json |> deserialize<'H>
                     match state with
                     | Error e -> Error e
