@@ -3,7 +3,7 @@ namespace BackEnd
 
 open System.Runtime.CompilerServices
 open System
-open System.Collections
+open System.Threading
 open FSharp.Data.Sql
 open FSharp.Core
 open FSharpPlus
@@ -12,16 +12,6 @@ open Shared
 open Shared.Utils
 open Shared.EventSourcing
 open Newtonsoft.Json
-open System.Threading
-open System
-open System.Runtime.CompilerServices
-
-open FSharp.Core
-
-open EventSourcing
-
-open FSharpPlus
-open FSharpPlus.Data
 
 module CacheRepository =
     type RepoCache<'H> private () =
@@ -30,7 +20,7 @@ module CacheRepository =
         static let instance = RepoCache<'H>()
         static member Instance = instance
         [<MethodImpl(MethodImplOptions.Synchronized)>]
-        member this.tryAddToDictionary(arg, res) =
+        member private this.TryAddToDictionary(arg, res) =
             try
                 dic.Add(arg, res)
                 queue.Enqueue arg
@@ -39,12 +29,12 @@ module CacheRepository =
                     dic.Remove removed |> ignore
                 ()
             with :? _ as e -> printf "warning: cache is doing something wrong %A\n" e
-        member this.memoize (f: unit -> Result<'H, string>) (arg: int) =
+        member this.Memoize (f: unit -> Result<'H, string>) (arg: int) =
             if (dic.ContainsKey arg) then
                 dic.[arg]
             else
                 let res = f()
-                this.tryAddToDictionary(arg, res)
+                this.TryAddToDictionary(arg, res)
                 res
 module Repository =
     open CacheRepository
@@ -60,7 +50,7 @@ module Repository =
             let! result =
                 match storage.TryGetLastSnapshot()  with
                 | Some (id, eventId, json) ->
-                    let state = RepoCache<'H>.Instance.memoize(fun () -> json |> deserialize<'H>) id
+                    let state = RepoCache<'H>.Instance.Memoize(fun () -> json |> deserialize<'H>) id
                     match state with
                     | Error e -> Error e
                     | _ -> (eventId, state |> Result.get) |> Ok
