@@ -22,7 +22,7 @@ type StorageSnapshot = {
 }
 type IStorage =
     abstract member DeleteAllEvents: unit -> unit
-    abstract member TryGetLastSnapshot: unit -> Option<int * json>
+    abstract member TryGetLastSnapshot: unit -> Option<int * int * json>
     abstract member TryGetLastEventId: unit -> Option<int>
     abstract member TryGetLastSnapshotEventId: unit -> Option<int>
     abstract member TryGetLastSnapshotId: unit -> Option<int>
@@ -56,9 +56,10 @@ module DbStorage =
             member this.TryGetLastSnapshot() =
                 TPConnectionString
                 |> Sql.connect
-                |> Sql.query "SELECT event_id, snapshot FROM snapshots ORDER BY id DESC LIMIT 1"
+                |> Sql.query "SELECT id, event_id, snapshot FROM snapshots ORDER BY id DESC LIMIT 1"
                 |> Sql.executeAsync (fun read ->
                     (
+                        read.int "id",
                         read.int "event_id",
                         read.text "snapshot"
                     )

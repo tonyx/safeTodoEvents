@@ -10,6 +10,7 @@ open FSharpPlus
 open FSharpPlus.Data
 
 module Cache =
+    // caching events is fine with global vars whereas caching aggregate required embed them in a singleton (not sure why)
     let dic = Collections.Generic.Dictionary<'H * List<Processable<'H>>, Result<'H, string>>()
     let queue = Collections.Generic.Queue<'H * List<Processable<'H>>>()
     [<MethodImpl(MethodImplOptions.Synchronized)>]
