@@ -12,6 +12,9 @@ open TodoEvents
 let db = Repository.storage
 
 let appTests =
+
+    let third (_, _, c) = c
+
     testSequenced
     <| testList
         "App Tests" [
@@ -92,7 +95,7 @@ let appTests =
 
                 let snapValue =
                     snap.Value
-                    |> snd
+                    |> third
                     |> Utils.deserialize<Todos.Todos>
 
                 Expect.isOk snapValue "should be ok"
@@ -177,7 +180,7 @@ let appTests =
 
                 let snapValue =
                     snap.Value
-                    |> snd
+                    |> third
                     |> Utils.deserialize<Todos.Todos>
 
                 Expect.isOk snapValue "should be ok"
@@ -198,7 +201,7 @@ let appTests =
                     Repository.getState<Todos.Todos, TodoEvents.Event> Todos.Todos.Zero
                     |> Result.get
 
-                let (_, snapshot) = (db.TryGetLastSnapshot().Value)
+                let (_, _, snapshot) = (db.TryGetLastSnapshot().Value)
 
                 let snapshotState =
                     snapshot
