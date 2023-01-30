@@ -36,6 +36,7 @@ module CacheRepository =
                 let res = f()
                 this.TryAddToDictionary(arg, res)
                 res
+
 module Repository =
     open CacheRepository
     let storage: IStorage =
