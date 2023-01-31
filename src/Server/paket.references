@@ -7,3 +7,4 @@ FSharp.Control.AsyncSeq
 Npgsql.FSharp
 FSharp.Data
 SqlProvider
+System.collections

@@ -35,11 +35,13 @@ module MemoryStorage =
                 event_id_seq <- 1
                 snapshot_id_seq <- 1
             member this.TryGetLastSnapshot() =
-                snapshots |> List.tryLast |>> (fun x -> (x.Id, x.Snapshot))
+                snapshots |> List.tryLast |>> (fun x -> (x.Id, x.EventId, x.Snapshot))
             member this.TryGetLastEventId() =
                 events |> List.tryLast |>> (fun x -> x.Id)
             member this.TryGetLastSnapshotEventId() =
                 snapshots |> List.tryLast |>> (fun x -> x.EventId)
+            member this.TryGetLastSnapshotId() =
+                snapshots |> List.tryLast |>> (fun x -> x.Id)
             member this.TryGetEvent(id: int) =
                 events |> List.tryFind (fun x -> x.Id = id)
             member this.AddEvents (events') =
