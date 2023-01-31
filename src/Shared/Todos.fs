@@ -36,23 +36,15 @@ module Todos =
     open Shared
     open Utils
 
-    type Seat = int
-    type Table =
-        {
-            id: int
-            seats: List<Seat>
-        }
 
     type Todos =
         {
             todos: List<Todo>
-            tables: List<Table>
         }
         with
             static member Zero =
                 {
                     todos = []
-                    tables = []
                 }
             member this.AddTodo (t: Todo) =
                 ceResult {
