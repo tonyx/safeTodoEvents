@@ -22,10 +22,3 @@ module EventSourcing =
                     | Error err -> Error err
                     | Ok h -> h |> e.Process
             ) (h |> Ok)
-
-    let inline executes (l: List<Executable<'H, 'E>>) (h: 'H) =
-        let res =
-            l |> catchErrors (fun c -> h |> c.Execute)
-        match res with
-            | Error x -> Error x
-            | Ok x -> x |> List.fold (@) [] |> Ok
