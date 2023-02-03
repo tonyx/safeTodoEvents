@@ -5,6 +5,7 @@ open EventSourcing
 open Todos
 open TodoEvents
 open Shared
+open FSharpPlus
 
 module Commands =
     type Command =
@@ -25,4 +26,11 @@ module Commands =
                         | Ok _ -> [Event.TodoRemoved g] |> Ok
                         | Error x -> x |> Error
 
-
+                // how we can deal with commands returning multiple events
+                // | Add2Todos (t1, t2) ->
+                //     let events = [Event.TodoAdded t1; TodoAdded t2]
+                //     let evolved = fun () -> events |> evolve x
+                //     match
+                //         Cache.memoize (fun _ -> evolved()) (x, [Event.TodoAdded t1; TodoAdded t2] ) with
+                //         | Ok _ -> events |>  Ok
+                //         | Error x -> x |> Error

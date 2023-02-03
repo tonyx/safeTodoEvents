@@ -4,6 +4,7 @@ open Shared
 open Shared.Todos
 open Shared.Commands
 open Shared.TodoEvents
+open Shared.EventSourcing
 
 module App =
     open Repository

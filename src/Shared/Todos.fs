@@ -36,7 +36,6 @@ module Todos =
     open Shared
     open Utils
 
-
     type Todos =
         {
             todos: List<Todo>

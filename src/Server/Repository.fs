@@ -49,6 +49,7 @@ module Repository =
     let getLastSnapshot<'H> (zero: 'H) =
         ceResult {
             let! result =
+                // toto: memoize this could be a good idea
                 match storage.TryGetLastSnapshot()  with
                 | Some (id, eventId, json) ->
                     let state = RepoCache<'H>.Instance.Memoize(fun () -> json |> deserialize<'H>) id
