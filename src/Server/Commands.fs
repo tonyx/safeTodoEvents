@@ -2,26 +2,27 @@ namespace BackEnd
 
 open Shared
 open System
+open EventSourcing
+open BackEnd.Events
+open BackEnd.Aggregate
+open BackEnd.Cache
 
-module MetaCommands =
-    open Todos
-    open MetaEvents
-    open EventSourcing
+module Commands =
     type Command =
         | AddTodo of Todo
         | RemoveTodo of Guid
 
-        interface Executable<Aggregate.Aggregate, Event> with
-            member this.Execute (x: Aggregate.Aggregate) =
+        interface Executable<Aggregate, Event> with
+            member this.Execute (x: Aggregate) =
                 match this with
                 | AddTodo t ->
                     match
-                        x.AddTodo t with
-                        | Ok _ -> [Event.TodoAdded t] |> Ok
+                        EventCache<Aggregate>.Instance.Memoize (fun () -> x.AddTodo t) (x, [TodoAdded t]) with
+                        | Ok _ -> [TodoAdded t] |> Ok
                         | Error x -> x |> Error
                 | RemoveTodo g ->
                     match
-                        x.RemoveTodo g with
-                        | Ok _ -> [Event.TodoRemoved g] |> Ok
+                        EventCache<Aggregate>.Instance.Memoize (fun () -> x.RemoveTodo g) (x, [TodoRemoved g]) with
+                        | Ok _ -> [TodoRemoved g] |> Ok
                         | Error x -> x |> Error
 

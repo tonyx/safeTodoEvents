@@ -14,7 +14,6 @@ module Todos =
 
     let ceResult = CeResultBuilder()
 
-
     type Stat =
         {
             timeAdded: Map<Guid, DateTime>

@@ -6,8 +6,8 @@ open Expecto
 open BackEnd
 
 open BackEnd.Todos
-open BackEnd.MetaCommands
-open BackEnd.MetaEvents
+open BackEnd.Commands
+open BackEnd.Events
 open Shared
 open Server
 

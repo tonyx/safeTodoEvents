@@ -10,33 +10,10 @@ open FSharpPlus.Data
 open Shared
 open Shared.Utils
 open Shared.EventSourcing
+open BackEnd.Cache
 open Newtonsoft.Json
-module CacheRepository =
-    type RepoCache<'H> private () =
-        let dic = Collections.Generic.Dictionary<int, Result<'H, string>>()
-        let queue = Collections.Generic.Queue<int>()
-        static let instance = RepoCache<'H>()
-        static member Instance = instance
-        [<MethodImpl(MethodImplOptions.Synchronized)>]
-        member private this.TryAddToDictionary(arg, res) =
-            try
-                dic.Add(arg, res)
-                queue.Enqueue arg
-                if (queue.Count > 1) then
-                    let removed = queue.Dequeue()
-                    dic.Remove removed |> ignore
-                ()
-            with :? _ as e -> printf "warning: cache is doing something wrong %A\n" e
-        member this.Memoize (f: unit -> Result<'H, string>) (arg: int) =
-            if (dic.ContainsKey arg) then
-                dic.[arg]
-            else
-                let res = f()
-                this.TryAddToDictionary(arg, res)
-                res
 
 module Repository =
-    open CacheRepository
     let storage: IStorage =
         match Conf.storageType with
             | Conf.StorageType.Memory -> MemoryStorage.MemoryStorage()
@@ -49,7 +26,7 @@ module Repository =
             let! result =
                 match storage.TryGetLastSnapshot()  with
                 | Some (id, eventId, json) ->
-                    let state = RepoCache<'H>.Instance.Memoize(fun () -> json |> deserialize<'H>) id
+                    let state = SnapCache<'H>.Instance.Memoize(fun () -> json |> deserialize<'H>) id
                     match state with
                     | Error e -> Error e
                     | _ -> (eventId, state |> Result.get) |> Ok
@@ -88,7 +65,6 @@ module Repository =
         ceResult
             {
                 let! (id, state) = getState<'H, 'E> (zero: 'H)
-                // let snapshot = state |> JsonConvert.SerializeObject
                 let snapshot = JsonConvert.SerializeObject(state, Utils.serSettings)
                 let! result = storage.SetSnapshot (id, snapshot)
                 return result
