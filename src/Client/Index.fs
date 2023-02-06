@@ -88,7 +88,7 @@ let containerBox (model: Model) (dispatch: Msg -> unit) =
                     prop.children [
                         Bulma.input.text [
                             prop.value model.Input
-                            prop.placeholder "What needs to be f. done?"
+                            prop.placeholder "What needs to be done?"
                             prop.onChange (fun x -> SetInput x |> dispatch)
                         ]
                         Bulma.box [
