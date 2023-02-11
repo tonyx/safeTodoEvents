@@ -21,7 +21,7 @@ module Repository =
 
     let ceResult = CeResultBuilder()
 
-    let  getLastSnapshot<'H> (zero: 'H) =
+    let getLastSnapshot<'H> (zero: 'H) =
         ceResult {
             let! result =
                 match storage.TryGetLastSnapshot()  with
@@ -50,9 +50,9 @@ module Repository =
         }
 
     [<MethodImpl(MethodImplOptions.Synchronized)>]
-    let runCommand<'H, 'E when 'E :> Processable<'H>> (zero: 'H) (command: Executable<'H, 'E>)  =
+    let inline runCommand<'H, ^E when ^E :> Processable<'H>> (zero: 'H) (command: Executable<'H, ^E>)  =
         ceResult {
-            let! (_, state) = getState<'H, 'E> (zero)
+            let! (_, state) = getState<'H, ^E> (zero)
             let! events =
                 state
                 |> command.Execute

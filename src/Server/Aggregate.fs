@@ -40,4 +40,4 @@ module Aggregate =
                                 todos = todos
                                 projection = projection
                         }
-                    }
+                }

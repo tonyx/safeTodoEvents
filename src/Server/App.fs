@@ -22,12 +22,16 @@ module App =
     let addTodo todo =
         ceResult {
             let! _ =
-                todo |> Command.AddTodo |> (runCommand<Aggregate, Event> (Aggregate.Zero))
-            return! (mksnapshotIfInterval<Aggregate, Event> Aggregate.Zero)
+                todo
+                |> Command.AddTodo
+                |> runCommand<Aggregate, Event> (Aggregate.Zero)
+            return! mksnapshotIfInterval<Aggregate, Event> Aggregate.Zero
         }
     let removeTodo id =
         ceResult {
             let! _ =
-                id |> Command.RemoveTodo |> (runCommand<Aggregate, Event> Aggregate.Zero)
-            return! (mksnapshotIfInterval<Aggregate, Event> Aggregate.Zero)
+                id
+                |> Command.RemoveTodo
+                |> runCommand<Aggregate, Event> Aggregate.Zero
+            return! mksnapshotIfInterval<Aggregate, Event> Aggregate.Zero
         }
