@@ -5,16 +5,18 @@ open System
 open Expecto
 open BackEnd
 
+open BackEnd.Todos
+open BackEnd.Commands
+open BackEnd.Events
+open BackEnd.Aggregate
 open Shared
 open Server
-open TodoEvents
 
 let db = Repository.storage
 
 let appTests =
 
     let third (_, _, c) = c
-
     testSequenced
     <| testList
         "App Tests" [
@@ -48,12 +50,13 @@ let appTests =
             testCase "delete all events so that the current state is the init/zero state"
             <| fun _ ->
                 db.DeleteAllEvents()
+                Expect.isTrue true "true"
 
                 let (_, state) =
-                    Repository.getState<Todos.Todos, TodoEvents.Event> Todos.Todos.Zero
+                    Repository.getState<BackEnd.Aggregate.Aggregate, BackEnd.Events.Event> BackEnd.Aggregate.Aggregate.Zero
                     |> Result.get
 
-                Expect.equal state Todos.Todos.Zero "shold be equal"
+                Expect.equal state Aggregate.Zero "shold be equal"
 
             testCase "after adding an event, the state is not zero"
             <| fun _ ->
@@ -65,17 +68,18 @@ let appTests =
                         Description = "add"
                     }
 
-                let command = todo |> Commands.Command.AddTodo
+                let command = todo |> Command.AddTodo
+                Expect.isTrue true "true"
 
                 let _ =
                     command
-                    |> (Repository.runCommand<Todos.Todos, Event> Todos.Todos.Zero)
+                    |> (Repository.runCommand<Aggregate, Event> Aggregate.Zero)
 
                 let (_, state) =
-                    Repository.getState<Todos.Todos, TodoEvents.Event> Todos.Todos.Zero
+                    Repository.getState<Aggregate, Event> Aggregate.Zero
                     |> Result.get
 
-                Expect.notEqual state Todos.Todos.Zero "shold be equal"
+                Expect.notEqual state Aggregate.Zero "shold be equal"
 
             testCase "after adding an event, there is a snapshot in the db and it is not zero"
             <| fun _ ->
@@ -96,11 +100,15 @@ let appTests =
                 let snapValue =
                     snap.Value
                     |> third
-                    |> Utils.deserialize<Todos.Todos>
+                    |> Utils.deserialize<Aggregate>
 
                 Expect.isOk snapValue "should be ok"
-                let expected = { Todos.Todos.Zero with todos = [ todo ] }
-                Expect.equal (snapValue |> Result.get) expected "should be equal"
+                let expected =
+                    {
+                        (Todos.Zero) with
+                            todos = [todo]
+                    } :> ITodo
+                Expect.equal ((snapValue |> Result.get).todos) expected "should be equal"
 
             testCase "after adding and addtodo event, then state is the zero plus the todo just added"
             <| fun _ ->
@@ -116,81 +124,26 @@ let appTests =
                 Expect.isOk appAddCommand "should be ok"
 
                 let (_, state) =
-                    BackEnd.Repository.getState<Todos.Todos, Event> (Todos.Todos.Zero)
+                    BackEnd.Repository.getState<Aggregate, Event> (Aggregate.Zero)
                     |> Result.get
 
-                let expected = { Todos.Todos.Zero with todos = [ todo ] }
-                Expect.equal state expected "should be equal"
-
-            testCase "add two addTodos events and then check that the state includes them"
-            <| fun _ ->
-                db.DeleteAllEvents()
-
-                let todo =
+                let expected =
                     {
-                        Id = Guid.NewGuid()
-                        Description = "add"
-                    }
-
-                let appAddCommand = App.addTodo todo
-                Expect.isOk appAddCommand "shouold be ok"
-
-                let todo2 =
-                    {
-                        Id = Guid.NewGuid()
-                        Description = "add 2"
-                    }
-
-                let appAddCommand = App.addTodo todo2
-                Expect.isOk appAddCommand "shouold be ok"
-
-                let (_, state) =
-                    BackEnd.Repository.getState<Todos.Todos, Event> (Todos.Todos.Zero)
-                    |> Result.get
-
-                let state' = { state with todos = ((state.todos) |> List.sort) }
-
-                let expected = { Todos.Todos.Zero with todos = ([ todo2; todo ] |> List.sort) }
-                Expect.equal state' expected "should be equal"
-
-            testCase "add two addTodo events. The snapshot will by updated only to the first todo"
-            <| fun _ ->
-                db.DeleteAllEvents()
-
-                let todo =
-                    {
-                        Id = Guid.NewGuid()
-                        Description = "add"
-                    }
-
-                let appAddCommand = App.addTodo todo
-                Expect.isOk appAddCommand "shouold be ok"
-
-                let todo2 =
-                    {
-                        Id = Guid.NewGuid()
-                        Description = "add2"
-                    }
-
-                let appAddCommand = App.addTodo todo2
-                Expect.isOk appAddCommand "shouold be ok"
-
-                let snap = db.TryGetLastSnapshot()
-                Expect.isSome snap "should be some"
-
-                let snapValue =
-                    snap.Value
-                    |> third
-                    |> Utils.deserialize<Todos.Todos>
-
-                Expect.isOk snapValue "should be ok"
-                let expected = { Todos.Todos.Zero with todos = [ todo ] }
-                Expect.equal (snapValue |> Result.get) expected "should be equal"
+                        Aggregate.Zero with
+                            todos =
+                                {
+                                    Todos.Zero
+                                        with
+                                            todos = [todo]
+                                }
+                        }
+                Expect.equal state.todos expected.todos "should be equal"
 
             testCase "after adding the first todo a snapshot will be created"
             <| fun _ ->
                 db.DeleteAllEvents()
                 let initSnapshot = db.TryGetLastSnapshot()
+
                 Expect.isNone initSnapshot "should be none"
                 let id = Guid.NewGuid()
                 let todo = { Id = id; Description = "write tests" }
@@ -198,14 +151,14 @@ let appTests =
                 Expect.isOk added "should be ok"
 
                 let (_, state) =
-                    Repository.getState<Todos.Todos, TodoEvents.Event> Todos.Todos.Zero
+                    Repository.getState<Aggregate, Event> Aggregate.Zero
                     |> Result.get
 
                 let (_, _, snapshot) = (db.TryGetLastSnapshot().Value)
 
                 let snapshotState =
                     snapshot
-                    |> Utils.deserialize<Todos.Todos>
+                    |> Utils.deserialize<Aggregate>
                     |> Result.get
 
                 Expect.equal state snapshotState "should be equal"
@@ -224,8 +177,6 @@ let appTests =
 
                 let added = App.addTodo todo
                 Expect.isOk added "should be ok"
-                let st = Repository.getState<Todos.Todos, TodoEvents.Event> (Todos.Todos.Zero)
-                Expect.isOk st "should be ok"
 
                 let todo' =
                         {

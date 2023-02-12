@@ -20,4 +20,5 @@ type ITodosApi =
     { getTodos: unit -> Async<Todo list>
       addTodo: Todo -> Async<Todo>
       removeTodo: Guid -> Async<Guid>
+      getAverageTime: unit -> Async<int>
       }

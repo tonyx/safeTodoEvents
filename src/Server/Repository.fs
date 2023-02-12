@@ -3,7 +3,6 @@ namespace BackEnd
 
 open System.Runtime.CompilerServices
 open System
-open System.Threading
 open FSharp.Data.Sql
 open FSharp.Core
 open FSharpPlus
@@ -11,6 +10,7 @@ open FSharpPlus.Data
 open Shared
 open Shared.Utils
 open Shared.EventSourcing
+open BackEnd.Cache
 open Newtonsoft.Json
 
 module CacheRepository =
@@ -76,9 +76,9 @@ module Repository =
         }
 
     [<MethodImpl(MethodImplOptions.Synchronized)>]
-    let runCommand<'H, 'E when 'E :> Processable<'H>> (zero: 'H) (command: Executable<'H, 'E>)  =
+    let inline runCommand<'H, ^E when ^E :> Processable<'H>> (zero: 'H) (command: Executable<'H, ^E>)  =
         ceResult {
-            let! (_, state) = getState<'H, 'E> (zero)
+            let! (_, state) = getState<'H, ^E> (zero)
             let! events =
                 state
                 |> command.Execute
@@ -91,7 +91,7 @@ module Repository =
         ceResult
             {
                 let! (id, state) = getState<'H, 'E> (zero: 'H)
-                let snapshot = state |> JsonConvert.SerializeObject
+                let snapshot = JsonConvert.SerializeObject(state, Utils.serSettings)
                 let! result = storage.SetSnapshot (id, snapshot)
                 return result
             }

@@ -4,13 +4,21 @@ open FSharp.Core
 open FSharpPlus
 open FSharpPlus.Data
 open Newtonsoft.Json
+open Newtonsoft.Json.Converters
+open Newtonsoft.Json.Serialization
 
 module Utils =
+    let serSettings = JsonSerializerSettings()
+    serSettings.TypeNameHandling <- TypeNameHandling.Objects
+
     let deserialize<'H> (json: string): Result<'H, string> =
         try
-            json |> JsonConvert.DeserializeObject<'H> |> Ok
+            JsonConvert.DeserializeObject<'H>(json, serSettings) |> Ok
         with
-        | ex  -> Error (ex.ToString())
+        | ex  ->
+            printf "error deserialize: %A" ex
+            Error (ex.ToString())
+
     type CeResultBuilder()  =
         member this.Bind(x, f) =
             match x with
@@ -26,7 +34,6 @@ module Utils =
         member this.ReturnFrom(x) =
             x
         member this.Zero() = () |> Error
-
 
     let catchErrors f l =
         let (okList, errors) =
