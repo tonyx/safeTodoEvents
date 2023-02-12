@@ -68,6 +68,19 @@ module DbStorage =
                 |> Async.RunSynchronously
                 |> Seq.tryHead
 
+            member this.TryGetLastSnapshotId() =
+                TPConnectionString
+                |> Sql.connect
+                |> Sql.query "SELECT id FROM snapshots ORDER BY id DESC LIMIT 1"
+                |> Sql.executeAsync (fun read ->
+                    (
+                        read.int "id"
+                    )
+                )
+                |> Async.AwaitTask
+                |> Async.RunSynchronously
+                |> Seq.tryHead
+
             member this.TryGetLastEventId() =
                 TPConnectionString
                 |> Sql.connect
@@ -82,19 +95,6 @@ module DbStorage =
                 |> Sql.connect
                 |> Sql.query "SELECT event_id from snapshots ORDER BY id DESC LIMIT 1"
                 |> Sql.executeAsync  (fun read -> read.int "event_id")
-                |> Async.AwaitTask
-                |> Async.RunSynchronously
-                |> Seq.tryHead
-
-            member this.TryGetLastSnapshotId() =
-                TPConnectionString
-                |> Sql.connect
-                |> Sql.query "SELECT id FROM snapshots ORDER BY id DESC LIMIT 1"
-                |> Sql.executeAsync (fun read ->
-                    (
-                        read.int "id"
-                    )
-                )
                 |> Async.AwaitTask
                 |> Async.RunSynchronously
                 |> Seq.tryHead

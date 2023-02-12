@@ -14,6 +14,9 @@ open Server
 let db = Repository.storage
 
 let appTests =
+
+    let third (_, _, c) = c
+
     testSequenced
     <| testList
         "App Tests" [
@@ -96,7 +99,7 @@ let appTests =
 
                 let snapValue =
                     snap.Value
-                    |> snd
+                    |> third
                     |> Utils.deserialize<Todos.Todos>
 
                 Expect.isOk snapValue "should be ok"
@@ -192,8 +195,8 @@ let appTests =
 
                 let snapValue =
                     snap.Value
-                    |> snd
-                    |> Utils.deserialize<Aggregate>
+                    |> third
+                    |> Utils.deserialize<Todos.Todos>
 
                 Expect.isOk snapValue "should be ok"
                 let expected = ({ Aggregate.Zero.todos with todos = [ todo ] }).todos
@@ -213,8 +216,7 @@ let appTests =
                     Repository.getState<Aggregate, Event> Aggregate.Zero
                     |> Result.get
 
-                let (_, snapshot) = (db.TryGetLastSnapshot().Value)
-                Expect.isTrue true "true"
+                let (_, _, snapshot) = (db.TryGetLastSnapshot().Value)
 
                 // let snapshotState =
                 //     snapshot
