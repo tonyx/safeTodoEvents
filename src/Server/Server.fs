@@ -14,7 +14,7 @@ let todosApi =
                 async
                     {
                         return
-                            match (BackEnd.App.getAllTodos()) with
+                            match (App.getAllTodos()) with
                             | Ok l -> l
                             | Error x -> failwith x
                     }
@@ -22,7 +22,7 @@ let todosApi =
             fun todo ->
                 async {
                     return
-                        match (BackEnd.App.addTodo todo) with
+                        match (App.addTodo todo) with
                         | Ok _ -> todo
                         | Error x -> failwith x
                 }
@@ -30,7 +30,7 @@ let todosApi =
             fun guid ->
                 async {
                     return
-                        match (BackEnd.App.removeTodo guid) with
+                        match (App.removeTodo guid) with
                         | Ok _ -> guid
                         | Error x -> failwith x
                 }

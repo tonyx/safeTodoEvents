@@ -25,7 +25,7 @@ module Todos =
                 timeRemoved = [] |> Map.ofList
             }
 
-        member this.Purge() =
+        member private this.Purge() =
             let olds =
                 this.timeRemoved
                 |> Map.toList
@@ -67,7 +67,7 @@ module Todos =
                         timeAdded = this.timeAdded.Add(todo.Id, DateTime.Now)
                 }
                 :> ITodo
-                |> Result.Ok
+                |> Ok
             member this.RemoveTodo(id) =
                 {
                     this with
