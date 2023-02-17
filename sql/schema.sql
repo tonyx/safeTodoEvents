@@ -1,6 +1,6 @@
-create user todo with password 'todo';
+create user safe with password 'safe';
 
-create database todo;
+create database safe;
 grant all privileges on database todo to todo;
 
 \c todo;
@@ -157,28 +157,28 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- Name: TABLE events; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT ALL ON TABLE public.events TO todo;
+GRANT ALL ON TABLE public.events TO safe;
 
 
 --
 -- Name: SEQUENCE events_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT ALL ON SEQUENCE public.events_id_seq TO todo;
+GRANT ALL ON SEQUENCE public.events_id_seq TO safe;
 
 
 --
 -- Name: SEQUENCE snapshots_id_seq; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT ALL ON SEQUENCE public.snapshots_id_seq TO todo;
+GRANT ALL ON SEQUENCE public.snapshots_id_seq TO safe;
 
 
 --
 -- Name: TABLE snapshots; Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT ALL ON TABLE public.snapshots TO todo;
+GRANT ALL ON TABLE public.snapshots TO safe;
 
 
 --

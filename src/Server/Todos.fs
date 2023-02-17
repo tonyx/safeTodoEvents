@@ -8,9 +8,9 @@ open System
 module Todos =
     open Utils
 
-    type ITodo =
-        abstract member AddTodo: Todo -> Result<ITodo, string>
-        abstract member RemoveTodo: Guid -> Result<ITodo, string>
+    type Model =
+        abstract member AddTodo: Todo -> Result<Model, string>
+        abstract member RemoveTodo: Guid -> Result<Model, string>
 
     let ceResult = CeResultBuilder()
 
@@ -60,20 +60,20 @@ module Todos =
                     timeRemoved = timeRemovedPurged
             }
 
-        interface ITodo with
+        interface Model with
             member this.AddTodo(todo) =
                 {
                     this with
                         timeAdded = this.timeAdded.Add(todo.Id, DateTime.Now)
                 }
-                :> ITodo
+                :> Model
                 |> Ok
             member this.RemoveTodo(id) =
                 {
                     this with
                         timeRemoved = this.timeRemoved.Add(id, DateTime.Now)
                 }
-                :> ITodo
+                :> Model
                 |> Ok
 
         member this.AverageTodoTime() =
@@ -103,7 +103,7 @@ module Todos =
                 {
                     todos = []
                 }
-            interface ITodo with
+            interface Model with
                 member this.AddTodo (t: Todo) =
                     ceResult {
                         let! mustNotExist =

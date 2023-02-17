@@ -107,8 +107,8 @@ let appTests =
                     {
                         (Todos.Zero) with
                             todos = [todo]
-                    } :> ITodo
-                Expect.equal ((snapValue |> Result.get).todos) expected "should be equal"
+                    } :> Model
+                Expect.equal ((snapValue |> Result.get).model) expected "should be equal"
 
             testCase "after adding and addtodo event, then state is the zero plus the todo just added"
             <| fun _ ->
@@ -130,14 +130,14 @@ let appTests =
                 let expected =
                     {
                         Aggregate.Zero with
-                            todos =
+                            model =
                                 {
                                     Todos.Zero
                                         with
                                             todos = [todo]
                                 }
                         }
-                Expect.equal state.todos expected.todos "should be equal"
+                Expect.equal state.model expected.model "should be equal"
 
             testCase "after adding the first todo a snapshot will be created"
             <| fun _ ->

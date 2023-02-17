@@ -16,7 +16,7 @@ module App =
     let getAllTodos() =
         ceResult {
             let! (_, state) = getState<Aggregate, Event> Aggregate.Zero
-            let todos = (state.todos :?> Todos).GetTodos()
+            let todos = (state.model :?> Todos).GetTodos()
             return todos
         }
     let AverageTime() =

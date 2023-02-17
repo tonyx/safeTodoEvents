@@ -9,35 +9,35 @@ open Shared.Utils
 module Aggregate =
     type Aggregate =
         {
-            todos: ITodo
-            projection: ITodo
+            model: Model
+            projection: Model
         }
         static member Zero =
             {
-                todos = Todos.Zero
+                model = Todos.Zero
                 projection = Stat.Zero
             }
         member this.AddTodo (t: Todo) =
             ceResult
                 {
-                    let! todos = this.todos.AddTodo t
+                    let! model = this.model.AddTodo t
                     let! projection = this.projection.AddTodo t
                     return
                         {
                             this with
-                                todos = todos
+                                model = model
                                 projection = projection
                         }
                 }
         member this.RemoveTodo (id: Guid) =
             ceResult
                 {
-                    let! todos = this.todos.RemoveTodo id
+                    let! model = this.model.RemoveTodo id
                     let! projection = this.projection.RemoveTodo id
                     return
                         {
                             this with
-                                todos = todos
+                                model = model
                                 projection = projection
                         }
                 }
