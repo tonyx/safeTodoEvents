@@ -1,0 +1,12 @@
+{
+    "author": "Tony_X",
+    "classifications": [
+        "Web"
+    ],
+    "name": "EventSourcing on SAFE stack",
+    "identity": "EventSourcing.SAFE",
+    "shortName": "safees",
+    "tags": { "language": "F#"},
+    "sourceName": "SAFE_ES",
+    "preferNameDirectory" : "true"
+}
