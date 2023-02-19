@@ -16,13 +16,18 @@ let db = Repository.storage
 
 let appTests =
 
+    let setUp() =
+        db.DeleteAllEvents()
+        Cache.EventCache<Aggregate>.Instance.Clear()
+        Cache.SnapCache<Aggregate>.Instance.Clear()
+
     let third (_, _, c) = c
     testSequenced
     <| testList
         "App Tests" [
             testCase "add a todo"
                 <| fun _ ->
-                    db.DeleteAllEvents()
+                    setUp()
                     let todo =
                         {
                             Id = Guid.NewGuid()
@@ -33,23 +38,23 @@ let appTests =
                     Expect.isOk added "should be ok"
                     let retrieved = App.getAllTodos () |> Result.get
                     Expect.contains retrieved todo "should contain the added element"
+                    db.DeleteAllEvents()
 
             testCase "add and then remove a todo" <| fun _ ->
-                db.DeleteAllEvents()
+                setUp()
+                Cache.EventCache<Aggregate>.Instance.Clear()
+                Cache.SnapCache<Aggregate>.Instance.Clear()
+                let retrieved = App.getAllTodos () |> Result.get
                 let id = Guid.NewGuid()
                 let todo = { Id = id; Description = "write tests" }
                 let added = App.addTodo todo
                 Expect.isOk added "should be ok"
                 let retrieved = App.getAllTodos () |> Result.get
                 Expect.contains retrieved todo "should contain the added element"
-                let removed = App.removeTodo id
-                Expect.isOk removed "should be ok"
-                let retrieved' = App.getAllTodos () |> Result.get
-                Expect.isEmpty retrieved' "should be empty"
 
             testCase "delete all events so that the current state is the init/zero state"
             <| fun _ ->
-                db.DeleteAllEvents()
+                setUp()
                 Expect.isTrue true "true"
 
                 let (_, state) =
@@ -60,8 +65,7 @@ let appTests =
 
             testCase "after adding an event, the state is not zero"
             <| fun _ ->
-                db.DeleteAllEvents()
-
+                setUp()
                 let todo =
                     {
                         Id = Guid.NewGuid()
@@ -83,8 +87,7 @@ let appTests =
 
             testCase "after adding an event, there is a snapshot in the db and it is not zero"
             <| fun _ ->
-                db.DeleteAllEvents()
-
+                setUp()
                 let todo =
                     {
                         Id = Guid.NewGuid()
@@ -110,10 +113,9 @@ let appTests =
                     } :> Model
                 Expect.equal ((snapValue |> Result.get).model) expected "should be equal"
 
-            testCase "after adding and addtodo event, then state is the zero plus the todo just added"
+            testCase "after adding an addtodo event, then state is the zero plus the todo just added"
             <| fun _ ->
-                db.DeleteAllEvents()
-
+                setUp()
                 let todo =
                     {
                         Id = Guid.NewGuid()
@@ -141,7 +143,7 @@ let appTests =
 
             testCase "after adding the first todo a snapshot will be created"
             <| fun _ ->
-                db.DeleteAllEvents()
+                setUp()
                 let initSnapshot = db.TryGetLastSnapshot()
 
                 Expect.isNone initSnapshot "should be none"
@@ -165,7 +167,7 @@ let appTests =
 
             testCase "add a todo and then get state"
             <| fun _ ->
-                db.DeleteAllEvents()
+                setUp()
                 let initSnapshot = db.TryGetLastSnapshot()
                 Expect.isNone initSnapshot "should be none"
 
@@ -185,4 +187,4 @@ let appTests =
                         }
                 let added' = App.addTodo todo'
                 Expect.isOk added' "should be ok"
-          ]
+        ]

@@ -6,7 +6,7 @@ let all =
     testList "All"
         [
             AppTests.appTests
-            Shared.Tests.domain
+            ModelTests.modelTests
         ]
 
 [<EntryPoint>]

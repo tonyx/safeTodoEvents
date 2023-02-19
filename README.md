@@ -2,6 +2,10 @@
 
 I adapted the SAFE Template integrating it into a tiny _event sourcing_ set of utilities I created.
 
+Update:
+In version 1.0.2 there is an Aggregate containing models and projections (model and projections are equivalent and they implement the same interface).
+The aggregate works as a decorator for the model and the projections.
+
 I created an aggregate implementing our logic [Todos.fs](./src/Shared/Todos.fs). It is unaware the persistency logic, because I wrap members that are supposed to "change the state" (in a functional way) into commands and events, and then expose the commands in [App.fs](./src/Server/App.fs).
 To wrap specific domain logic members we need a discriminated union for the Events (in the Todos.fs module) and a discriminated union for commands [Commands.fs](./src/Shared/Commands.fs). What commands do is probing the respective members and return events if they don't return error.
 

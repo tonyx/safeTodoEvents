@@ -5,30 +5,33 @@ open System.Runtime.CompilerServices
 open FSharpPlus
 open System
 
-module MemoryStorage =
+module MemoryStorage=
     open BackEnd
+    type MemoryStorage private() =
 
-    let mutable event_id_seq = 1
-    let mutable snapshot_id_seq = 1
+        let mutable event_id_seq = 1
+        let mutable snapshot_id_seq = 1
 
-    [<MethodImpl(MethodImplOptions.Synchronized)>]
-    let next_event_id() =
-        let result = event_id_seq
-        event_id_seq <- event_id_seq+1
-        result
+        let mutable events:List<StorageEvent> = []
+        let mutable snapshots:List<StorageSnapshot> = []
 
-    [<MethodImpl(MethodImplOptions.Synchronized)>]
-    let next_snapshot_id() =
-        let result = snapshot_id_seq
-        snapshot_id_seq <- snapshot_id_seq+1
-        result
+        static let instance = MemoryStorage()
 
-    let mutable events:List<StorageEvent> = []
-    let mutable snapshots:List<StorageSnapshot> = []
+        [<MethodImpl(MethodImplOptions.Synchronized)>]
+        let next_event_id() =
+            let result = event_id_seq
+            event_id_seq <- event_id_seq + 1
+            result
+        [<MethodImpl(MethodImplOptions.Synchronized)>]
+        let next_snapshot_id() =
+            let result = snapshot_id_seq
+            snapshot_id_seq <- snapshot_id_seq + 1
+            result
 
-    type MemoryStorage =
-        new() =  {}
+        static member Instance = instance
+
         interface IStorage with
+            [<MethodImpl(MethodImplOptions.Synchronized)>]
             member this.DeleteAllEvents() =
                 events <- []
                 snapshots <- []
@@ -68,10 +71,3 @@ module MemoryStorage =
                     }
                 snapshots <- snapshots@[newSnapshot]
                 () |> Ok
-
-
-
-
-
-
-

@@ -5,7 +5,7 @@ open FSharp.Core
 module Conf =
     type StorageType = Postgres | Memory
 
-    let storageType = Postgres
+    let storageType = Memory
 
     let isTestEnv = true
     // atm there is only one db, but here I point out that we need different rights in
@@ -17,14 +17,14 @@ module Conf =
     let connectionString =
         if isTestEnv then
             "Server=127.0.0.1;"+
-            "Database=todo;" +
-            "User Id=todo;"+
-            "Password=todo;"
+            "Database=safe;" +
+            "User Id=safe;"+
+            "Password=safe;"
         else
             "Server=127.0.0.1;"+
-            "Database=todo;" +
-            "User Id=todo;"+
-            "Password=todo;"
+            "Database=safe;" +
+            "User Id=safe;"+
+            "Password=safe;"
 
     let intervalBetweenSnapshots = 5
 

@@ -26,13 +26,18 @@ module Cache =
                 ()
             with :? _ as e -> printf "warning: cache is doing something wrong %A\n" e
 
-         member this.Memoize (f: unit -> Result<'H, string>) (arg: 'H * List<Processable<'H>>) =
+        member this.Memoize (f: unit -> Result<'H, string>) (arg: 'H * List<Processable<'H>>) =
             if (dic.ContainsKey arg) then
-                dic.[arg]
+                let result = dic.[arg]
+                result
             else
                 let res = f()
                 this.TryAddToDictionary(arg, res)
                 res
+
+        member this.Clear() =
+            dic.Clear()
+            queue.Clear()
 
     type SnapCache<'H> private () =
         let dic = Collections.Generic.Dictionary<int, Result<'H, string>>()
@@ -56,3 +61,6 @@ module Cache =
                 let res = f()
                 this.TryAddToDictionary(arg, res)
                 res
+        member this.Clear() =
+            dic.Clear()
+            queue.Clear()

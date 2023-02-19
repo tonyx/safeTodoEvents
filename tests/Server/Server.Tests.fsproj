@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="App.Tests.fs" />
+    <Compile Include="Model.Tests.fs" />
     <Compile Include="Server.Tests.fs" />
   </ItemGroup>
   <ItemGroup>
