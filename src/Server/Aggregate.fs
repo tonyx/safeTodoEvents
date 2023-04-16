@@ -1,10 +1,8 @@
 namespace BackEnd
 
 open Shared
-open FSharpPlus
 open System
 open Todos
-open Shared.Utils
 
 module Aggregate =
     type Aggregate =
@@ -12,7 +10,7 @@ module Aggregate =
             model: Model
             projection: Model
         }
-        static member Zero =
+        static member Zero() =
             {
                 model = Todos.Zero
                 projection = Stat.Zero

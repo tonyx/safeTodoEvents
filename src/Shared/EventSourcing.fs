@@ -1,7 +1,5 @@
 namespace Shared
-open System
 open FSharp.Core
-
 open FSharpPlus
 open FSharpPlus.Data
 open Utils

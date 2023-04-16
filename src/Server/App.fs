@@ -2,9 +2,6 @@ namespace BackEnd
 open BackEnd.Aggregate
 
 open Shared
-// open Shared.Todos
-// open Shared.Commands
-// open Shared.TodoEvents
 open Shared.EventSourcing
 
 module App =
@@ -15,13 +12,13 @@ module App =
 
     let getAllTodos() =
         ceResult {
-            let! (_, state) = getState<Aggregate, Event> Aggregate.Zero
+            let! (_, state) = getState<Aggregate, Event> (Aggregate.Zero())
             let todos = (state.model :?> Todos).GetTodos()
             return todos
         }
     let AverageTime() =
         ceResult {
-            let! (_, state) = getState<Aggregate, Event> Aggregate.Zero
+            let! (_, state) = getState<Aggregate, Event> (Aggregate.Zero())
             let averageTime = (state.projection :?> Stat).AverageTodoTime()
             return (int) averageTime
         }
@@ -30,14 +27,14 @@ module App =
             let! _ =
                 todo
                 |> Command.AddTodo
-                |> runCommand<Aggregate, Event> (Aggregate.Zero)
-            return! mksnapshotIfInterval<Aggregate, Event> Aggregate.Zero
+                |> runCommand<Aggregate, Event> (Aggregate.Zero())
+            return! mksnapshotIfInterval<Aggregate, Event> (Aggregate.Zero())
         }
     let removeTodo id =
         ceResult {
             let! _ =
                 id
                 |> Command.RemoveTodo
-                |> runCommand<Aggregate, Event> Aggregate.Zero
-            return! mksnapshotIfInterval<Aggregate, Event> Aggregate.Zero
+                |> runCommand<Aggregate, Event> (Aggregate.Zero())
+            return! mksnapshotIfInterval<Aggregate, Event> (Aggregate.Zero())
         }

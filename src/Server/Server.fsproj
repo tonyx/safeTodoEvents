@@ -9,9 +9,9 @@
     <Compile Include="DbStorage.fs" />
     <Compile Include="MemoryStorage.fs" />
     <Compile Include="Cache.fs" />
-    <Compile Include="Repository.fs" />
     <Compile Include="Todos.fs" />
     <Compile Include="Aggregate.fs" />
+    <Compile Include="Repository.fs" />
     <Compile Include="Events.fs" />
     <Compile Include="Commands.fs" />
     <Compile Include="App.fs" />

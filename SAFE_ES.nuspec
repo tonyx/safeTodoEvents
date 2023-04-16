@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>SAFE_ES</id>
+    <version>1.0.4</version>
+    <authors>Antonio Lucca</authors>
+    <owners>Antonio Lucca</owners>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/tonyx/safeTodoEvents</projectUrl>
+    <description>Simple event sourcing integrated with the SAFE stack.</description>
+    <copyright>Copyright (c) Antonio Lucca aka Tonyx 2023</copyright>
+    <readme>README.md</readme>
+    <releaseNotes>Initial release.</releaseNotes>
+  </metadata>
+</package>
+

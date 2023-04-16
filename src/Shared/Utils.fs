@@ -1,11 +1,8 @@
 namespace Shared
-open System
 open FSharp.Core
 open FSharpPlus
 open FSharpPlus.Data
 open Newtonsoft.Json
-open Newtonsoft.Json.Converters
-open Newtonsoft.Json.Serialization
 
 module Utils =
     let serSettings = JsonSerializerSettings()

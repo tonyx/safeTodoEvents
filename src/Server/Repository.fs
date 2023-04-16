@@ -2,7 +2,6 @@
 namespace BackEnd
 
 open System.Runtime.CompilerServices
-open System
 open FSharp.Data.Sql
 open FSharp.Core
 open FSharpPlus
@@ -20,8 +19,7 @@ module Repository =
             | Conf.StorageType.Postgres -> DbStorage.PgDb()
 
     let ceResult = CeResultBuilder()
-
-    let getLastSnapshot<'H> (zero: 'H) =
+    let inline getLastSnapshot<'H when ^H: (static member Zero: unit -> ^H)>  (zero: 'H) =
         ceResult {
             let! result =
                 match storage.TryGetLastSnapshot()  with
@@ -34,7 +32,9 @@ module Repository =
             return result
         }
 
-    let getState<'H, 'E when 'E :> Processable<'H>> (zero: 'H) =
+    let inline getState<'H, 'E
+        when ^H: (static member Zero: unit -> ^H)
+        and 'E :> Processable<'H>> (zero: 'H) =
         ceResult {
             let! (id, state) = getLastSnapshot<'H> (zero)
             let events = storage.GetEventsAfterId id
@@ -50,9 +50,12 @@ module Repository =
         }
 
     [<MethodImpl(MethodImplOptions.Synchronized)>]
-    let inline runCommand<'H, ^E when ^E :> Processable<'H>> (zero: 'H) (command: Executable<'H, ^E>)  =
+    let inline runCommand<'H, 'E
+        when ^H: (static member Zero: unit -> ^H)
+        and
+        'E :> Processable<'H>> (zero: 'H) (command: Executable<'H, 'E>)  =
         ceResult {
-            let! (_, state) = getState<'H, ^E> (zero)
+            let! (_, state) = getState<'H, 'E> (zero)
             let! events =
                 state
                 |> command.Execute
@@ -61,16 +64,20 @@ module Repository =
             return eventsAdded
         }
 
-    let mksnapshot<'H, 'E when 'E :> Processable<'H>> (zero: 'H) =
+    let inline mksnapshot<'H, 'E
+        when ^H: (static member Zero: unit -> ^H)
+        and 'E :> Processable<'H>> (zero: 'H) =
         ceResult
             {
-                let! (id, state) = getState<'H, 'E> (zero: 'H)
+                let! (id, state) = getState<'H, 'E> (zero: ^H)
                 let snapshot = JsonConvert.SerializeObject(state, Utils.serSettings)
                 let! result = storage.SetSnapshot (id, snapshot)
                 return result
             }
 
-    let mksnapshotIfInterval<'H, 'E when 'E :> Processable<'H>> (zero: 'H) =
+    let inline mksnapshotIfInterval<'H, 'E
+        when ^H: (static member Zero: unit -> ^H)
+        and 'E :> Processable<'H>> (zero: 'H) =
         ceResult
             {
                 let! lastEventId = storage.TryGetLastEventId() |> optionToResult

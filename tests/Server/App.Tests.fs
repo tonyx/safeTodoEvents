@@ -58,10 +58,10 @@ let appTests =
                 Expect.isTrue true "true"
 
                 let (_, state) =
-                    Repository.getState<BackEnd.Aggregate.Aggregate, BackEnd.Events.Event> BackEnd.Aggregate.Aggregate.Zero
+                    Repository.getState<BackEnd.Aggregate.Aggregate, BackEnd.Events.Event> (BackEnd.Aggregate.Aggregate.Zero())
                     |> Result.get
 
-                Expect.equal state Aggregate.Zero "shold be equal"
+                Expect.equal state (Aggregate.Zero()) "shold be equal"
 
             testCase "after adding an event, the state is not zero"
             <| fun _ ->
@@ -77,13 +77,13 @@ let appTests =
 
                 let _ =
                     command
-                    |> (Repository.runCommand<Aggregate, Event> Aggregate.Zero)
+                    |> Repository.runCommand<Aggregate, Event> (Aggregate.Zero())
 
                 let (_, state) =
-                    Repository.getState<Aggregate, Event> Aggregate.Zero
+                    Repository.getState<Aggregate, Event> (Aggregate.Zero())
                     |> Result.get
 
-                Expect.notEqual state Aggregate.Zero "shold be equal"
+                Expect.notEqual state (Aggregate.Zero()) "shold be equal"
 
             testCase "after adding an event, there is a snapshot in the db and it is not zero"
             <| fun _ ->
@@ -126,12 +126,12 @@ let appTests =
                 Expect.isOk appAddCommand "should be ok"
 
                 let (_, state) =
-                    BackEnd.Repository.getState<Aggregate, Event> (Aggregate.Zero)
+                    BackEnd.Repository.getState<Aggregate, Event> (Aggregate.Zero())
                     |> Result.get
 
                 let expected =
                     {
-                        Aggregate.Zero with
+                        Aggregate.Zero() with
                             model =
                                 {
                                     Todos.Zero
@@ -153,7 +153,7 @@ let appTests =
                 Expect.isOk added "should be ok"
 
                 let (_, state) =
-                    Repository.getState<Aggregate, Event> Aggregate.Zero
+                    Repository.getState<Aggregate, Event> (Aggregate.Zero())
                     |> Result.get
 
                 let (_, _, snapshot) = (db.TryGetLastSnapshot().Value)
